@@ -1,5 +1,5 @@
 import pool from "./db";
-import type { Lead, LeadListItem, StatusCount } from "./types";
+import type { Lead, LeadListItem, ProposalDraft, StatusCount } from "./types";
 
 export async function getLeads(filters?: {
   status?: string;
@@ -122,5 +122,38 @@ export async function insertReviewDecision(
     `INSERT INTO review_decisions (lead_id, reviewer, decision, decision_reason)
      VALUES ($1, $2, $3::review_decision_enum, $4)`,
     [leadId, "dashboard_user", decision, reason || null],
+  );
+}
+
+export async function getProposalDrafts(
+  leadId: string,
+): Promise<ProposalDraft[]> {
+  const result = await pool.query(
+    `SELECT proposal_id, lead_id,
+            profile_angle_used::text, recommended_proposal_type::text,
+            selected_proposal_type::text,
+            short_version, standard_version, consultative_version,
+            optional_questions, internal_note,
+            generator_schema_version, generator_prompt_version,
+            draft_status::text, is_active,
+            created_at, updated_at
+     FROM proposal_drafts
+     WHERE lead_id = $1
+     ORDER BY is_active DESC, created_at DESC`,
+    [leadId],
+  );
+  return result.rows as ProposalDraft[];
+}
+
+export async function selectProposalType(
+  proposalId: string,
+  proposalType: string,
+): Promise<void> {
+  await pool.query(
+    `UPDATE proposal_drafts
+     SET selected_proposal_type = $1::proposal_type_enum,
+         draft_status = 'selected'
+     WHERE proposal_id = $2`,
+    [proposalType, proposalId],
   );
 }

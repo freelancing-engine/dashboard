@@ -4,11 +4,31 @@ import { useActionState } from "react";
 import { reviewLead } from "../../actions";
 
 const ACTIONS = [
-  { decision: "approve_for_draft", label: "Aprobar para draft", color: "bg-green-600 hover:bg-green-700 text-white" },
-  { decision: "save_for_later", label: "Guardar", color: "bg-blue-100 hover:bg-blue-200 text-blue-800" },
-  { decision: "archive", label: "Archivar", color: "bg-gray-200 hover:bg-gray-300 text-gray-700" },
-  { decision: "re_score", label: "Re-puntuar", color: "bg-yellow-100 hover:bg-yellow-200 text-yellow-800" },
-  { decision: "reject", label: "Rechazar", color: "bg-red-100 hover:bg-red-200 text-red-800" },
+  {
+    decision: "approve_for_draft",
+    label: "Aprobar para draft",
+    color: "bg-green-600 hover:bg-green-700 text-white",
+  },
+  {
+    decision: "save_for_later",
+    label: "Guardar",
+    color: "bg-blue-100 hover:bg-blue-200 text-blue-800",
+  },
+  {
+    decision: "archive",
+    label: "Archivar",
+    color: "bg-gray-200 hover:bg-gray-300 text-gray-700",
+  },
+  {
+    decision: "re_score",
+    label: "Re-puntuar",
+    color: "bg-yellow-100 hover:bg-yellow-200 text-yellow-800",
+  },
+  {
+    decision: "reject",
+    label: "Rechazar",
+    color: "bg-red-100 hover:bg-red-200 text-red-800",
+  },
 ];
 
 export function ReviewActions({
@@ -26,7 +46,9 @@ export function ReviewActions({
     null,
   );
 
-  const showActions = ["needs_review", "scored", "approved_for_draft"].includes(currentStatus);
+  const showActions = ["needs_review", "scored", "approved_for_draft"].includes(
+    currentStatus,
+  );
   if (!showActions) return null;
 
   return (

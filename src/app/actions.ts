@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateLeadStatus, insertReviewDecision } from "@/lib/leads";
+import {
+  updateLeadStatus,
+  insertReviewDecision,
+  selectProposalType,
+} from "@/lib/leads";
 
 export async function reviewLead(formData: FormData) {
   const leadId = formData.get("leadId") as string;
@@ -26,4 +30,116 @@ export async function reviewLead(formData: FormData) {
 
   revalidatePath(`/leads/${leadId}`);
   revalidatePath("/");
+}
+
+export async function selectProposal(formData: FormData) {
+  const proposalId = formData.get("proposalId") as string;
+  const proposalType = formData.get("proposalType") as string;
+
+  if (!proposalId || !proposalType) return;
+
+  await selectProposalType(proposalId, proposalType);
+
+  revalidatePath("/");
+}
+
+export async function generateProposal(formData: FormData) {
+  const leadId = formData.get("leadId") as string;
+  if (!leadId) return { error: "Lead ID requerido" };
+
+  const agentUrl = process.env.AGENT_SERVICE_URL || "http://agent-service:8000";
+  const token = process.env.AGENT_SERVICE_TOKEN || "";
+
+  const pool = (await import("@/lib/db")).default;
+
+  const leadResult = await pool.query(
+    `SELECT lead_id, platform::text, title,
+            COALESCE(normalized_description, raw_description) as description,
+            url, client_name, client_country, client_history_summary,
+            client_spend, client_hire_rate,
+            budget_type, budget_value, proposal_count,
+            stack_tags, score_total, verdict::text,
+            best_profile_angle::text, best_proposal_type::text,
+            reasoning_summary
+     FROM leads WHERE lead_id = $1`,
+    [leadId],
+  );
+
+  const lead = leadResult.rows[0];
+  if (!lead) return { error: "Lead no encontrado" };
+
+  const payload = {
+    lead_id: lead.lead_id,
+    platform: lead.platform,
+    title: lead.title,
+    description: lead.description,
+    url: lead.url,
+    client_name: lead.client_name,
+    client_country: lead.client_country,
+    client_history_summary: lead.client_history_summary,
+    client_spend: lead.client_spend,
+    client_hire_rate: lead.client_hire_rate,
+    budget_type: lead.budget_type,
+    budget_value: lead.budget_value,
+    proposal_count: lead.proposal_count,
+    stack_tags: lead.stack_tags || [],
+    score_total: lead.score_total,
+    verdict: lead.verdict,
+    profile_angle: lead.best_profile_angle || "flagship",
+    proposal_type: lead.best_proposal_type || "standard",
+    reasoning_summary: lead.reasoning_summary,
+    language: "es",
+  };
+
+  try {
+    const resp = await fetch(`${agentUrl}/v1/generate-proposal`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      return { error: `Agent service error: ${resp.status} — ${errBody}` };
+    }
+
+    const result = await resp.json();
+    const data = result.data;
+
+    await pool.query(
+      `INSERT INTO proposal_drafts
+         (lead_id, profile_angle_used, recommended_proposal_type,
+          short_version, standard_version, consultative_version,
+          optional_questions, internal_note,
+          generator_schema_version, generator_prompt_version)
+       VALUES ($1, $2::profile_angle_enum, $3::proposal_type_enum,
+               $4, $5, $6, $7::jsonb, $8, $9, $10)`,
+      [
+        lead.lead_id,
+        data.profile_angle_used,
+        data.recommended_proposal_type,
+        data.short_proposal,
+        data.standard_proposal,
+        data.consultative_proposal,
+        JSON.stringify(data.optional_clarifying_questions || []),
+        data.internal_note,
+        result.schema_version || null,
+        null,
+      ],
+    );
+
+    await pool.query(
+      "UPDATE leads SET lead_status = 'draft_ready'::lead_status_enum WHERE lead_id = $1 AND lead_status = 'approved_for_draft'::lead_status_enum",
+      [lead.lead_id],
+    );
+
+    revalidatePath(`/leads/${leadId}`);
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    return { error: `Error generando propuesta: ${err instanceof Error ? err.message : String(err)}` };
+  }
 }

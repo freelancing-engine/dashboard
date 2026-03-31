@@ -96,6 +96,27 @@ export interface LeadListItem {
   created_at: string;
 }
 
+export type DraftStatus = "generated" | "selected" | "submitted_manually" | "archived";
+
+export interface ProposalDraft {
+  proposal_id: string;
+  lead_id: string;
+  profile_angle_used: ProfileAngle;
+  recommended_proposal_type: ProposalType;
+  selected_proposal_type: ProposalType | null;
+  short_version: string | null;
+  standard_version: string | null;
+  consultative_version: string | null;
+  optional_questions: string[];
+  internal_note: string | null;
+  generator_schema_version: string | null;
+  generator_prompt_version: string | null;
+  draft_status: DraftStatus;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface StatusCount {
   lead_status: LeadStatus;
   count: number;

@@ -1,8 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getLeadById } from "@/lib/leads";
+import { getLeadById, getProposalDrafts } from "@/lib/leads";
 import { STATUS_LABELS, STATUS_COLORS } from "../../components/stats-bar";
 import { ReviewActions } from "./review-actions";
+import { ApplicationSuggestion } from "./application-suggestion";
+import { ProposalPreview } from "./proposal-preview";
+import { GenerateProposalButton } from "./generate-proposal-button";
 
 const SCORE_DIMENSIONS = [
   { key: "score_technical_fit", label: "Technical Fit", max: 20 },
@@ -28,12 +31,18 @@ export default async function LeadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const lead = await getLeadById(id);
+  const [lead, drafts] = await Promise.all([
+    getLeadById(id),
+    getProposalDrafts(id),
+  ]);
   if (!lead) notFound();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-      <Link href="/" className="mb-4 inline-block text-sm text-blue-600 hover:underline">
+      <Link
+        href="/"
+        className="mb-4 inline-block text-sm text-blue-600 hover:underline"
+      >
         ← Volver al listado
       </Link>
 
@@ -44,17 +53,26 @@ export default async function LeadDetailPage({
           {lead.client_country && <span>· {lead.client_country}</span>}
           {lead.budget_value && <span>· {lead.budget_value}</span>}
           {lead.url && (
-            <a href={lead.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+            <a
+              href={lead.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
               Ver publicación ↗
             </a>
           )}
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[lead.lead_status] || "bg-gray-100"}`}>
+          <span
+            className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[lead.lead_status] || "bg-gray-100"}`}
+          >
             {STATUS_LABELS[lead.lead_status] || lead.lead_status}
           </span>
           {lead.verdict && (
-            <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${VERDICT_BADGE[lead.verdict] || "bg-gray-100"}`}>
+            <span
+              className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${VERDICT_BADGE[lead.verdict] || "bg-gray-100"}`}
+            >
               {lead.verdict.replace(/_/g, " ")}
             </span>
           )}
@@ -69,7 +87,9 @@ export default async function LeadDetailPage({
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Score breakdown */}
         <div className="rounded-lg border bg-white p-4 shadow-sm lg:col-span-1">
-          <h2 className="mb-3 font-semibold">Puntaje: {lead.score_total ?? "—"} / 100</h2>
+          <h2 className="mb-3 font-semibold">
+            Puntaje: {lead.score_total ?? "—"} / 100
+          </h2>
           <div className="space-y-2">
             {SCORE_DIMENSIONS.map(({ key, label, max }) => {
               const value = lead[key as keyof typeof lead] as number | null;
@@ -78,7 +98,9 @@ export default async function LeadDetailPage({
                 <div key={key}>
                   <div className="flex justify-between text-xs text-gray-600">
                     <span>{label}</span>
-                    <span>{value ?? "—"} / {max}</span>
+                    <span>
+                      {value ?? "—"} / {max}
+                    </span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-200">
                     <div
@@ -98,7 +120,9 @@ export default async function LeadDetailPage({
           <div className="rounded-lg border bg-white p-4 shadow-sm">
             <h2 className="mb-2 font-semibold">Descripción</h2>
             <p className="whitespace-pre-wrap text-sm text-gray-700">
-              {lead.normalized_description || lead.raw_description || "Sin descripción"}
+              {lead.normalized_description ||
+                lead.raw_description ||
+                "Sin descripción"}
             </p>
           </div>
 
@@ -129,21 +153,14 @@ export default async function LeadDetailPage({
               <dd>
                 {lead.stack_tags?.length
                   ? lead.stack_tags.map((tag) => (
-                      <span key={tag} className="mr-1 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs">
+                      <span
+                        key={tag}
+                        className="mr-1 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs"
+                      >
                         {tag}
                       </span>
                     ))
                   : "—"}
-              </dd>
-              <dt className="text-gray-500">Red flags</dt>
-              <dd>
-                {lead.red_flags?.length
-                  ? lead.red_flags.map((flag, i) => (
-                      <span key={i} className="mr-1 inline-block rounded bg-red-50 px-2 py-0.5 text-xs text-red-700">
-                        {flag}
-                      </span>
-                    ))
-                  : "Ninguno"}
               </dd>
               <dt className="text-gray-500">Próximo paso</dt>
               <dd>{lead.next_step?.replace(/_/g, " ") || "—"}</dd>
@@ -152,18 +169,24 @@ export default async function LeadDetailPage({
             </dl>
           </div>
 
-          {/* Reasoning */}
-          {lead.reasoning_summary && (
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
-              <h2 className="mb-2 font-semibold">Razonamiento</h2>
-              <p className="whitespace-pre-wrap text-sm text-gray-700">
-                {lead.reasoning_summary}
-              </p>
-            </div>
-          )}
+          {/* Application suggestion */}
+          <ApplicationSuggestion lead={lead} />
+
+          {/* Proposal drafts */}
+          <ProposalPreview drafts={drafts} />
+
+          {/* Generate proposal button */}
+          <GenerateProposalButton
+            leadId={lead.lead_id}
+            currentStatus={lead.lead_status}
+            hasDrafts={drafts.length > 0}
+          />
 
           {/* Review actions */}
-          <ReviewActions leadId={lead.lead_id} currentStatus={lead.lead_status} />
+          <ReviewActions
+            leadId={lead.lead_id}
+            currentStatus={lead.lead_status}
+          />
         </div>
       </div>
     </main>
