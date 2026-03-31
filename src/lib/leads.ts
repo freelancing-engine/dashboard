@@ -71,6 +71,7 @@ export async function getLeadById(leadId: string): Promise<Lead | null> {
             score_total, verdict::text, red_flags,
             best_profile_angle::text, best_proposal_type::text,
             next_step, reasoning_summary,
+            extracted_fields,
             created_at, updated_at
      FROM leads WHERE lead_id = $1`,
     [leadId],

@@ -77,8 +77,24 @@ export interface Lead {
   best_proposal_type: ProposalType | null;
   next_step: string | null;
   reasoning_summary: string | null;
+  extracted_fields: ExtractedFields | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ExtractedFields {
+  required_skills?: string[];
+  nice_to_have_skills?: string[] | null;
+  project_type?: string | null;
+  estimated_duration?: string | null;
+  work_arrangement?: string | null;
+  timezone_preference?: string | null;
+  team_size_hint?: string | null;
+  key_deliverables?: string[] | null;
+  industry_domain?: string | null;
+  integration_points?: string[] | null;
+  ai_summary?: string;
+  extraction_confidence?: number;
 }
 
 export interface LeadListItem {

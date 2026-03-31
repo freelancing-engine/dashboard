@@ -6,6 +6,7 @@ import { ReviewActions } from "./review-actions";
 import { ApplicationSuggestion } from "./application-suggestion";
 import { ProposalPreview } from "./proposal-preview";
 import { GenerateProposalButton } from "./generate-proposal-button";
+import { ExtractedFieldsCard } from "./extracted-fields";
 
 const SCORE_DIMENSIONS = [
   { key: "score_technical_fit", label: "Technical Fit", max: 20 },
@@ -125,6 +126,11 @@ export default async function LeadDetailPage({
                 "Sin descripción"}
             </p>
           </div>
+
+          {/* AI extracted fields */}
+          {lead.extracted_fields && (
+            <ExtractedFieldsCard fields={lead.extracted_fields} />
+          )}
 
           {/* Client info */}
           <div className="rounded-lg border bg-white p-4 shadow-sm">
