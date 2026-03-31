@@ -8,6 +8,7 @@ const ACTIONS = [
     decision: "approve_for_draft",
     label: "Aprobar para draft",
     color: "bg-green-600 hover:bg-green-700 text-white",
+    hint: "Genera propuesta automáticamente",
   },
   {
     decision: "save_for_later",
@@ -69,7 +70,7 @@ export function ReviewActions({
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          {ACTIONS.map(({ decision, label, color }) => (
+          {ACTIONS.map(({ decision, label, color, hint }) => (
             <button
               key={decision}
               type="submit"
@@ -77,6 +78,7 @@ export function ReviewActions({
               value={decision}
               disabled={isPending}
               className={`rounded px-3 py-1.5 text-sm font-medium ${color} disabled:opacity-50`}
+              title={hint}
             >
               {isPending ? "..." : label}
             </button>

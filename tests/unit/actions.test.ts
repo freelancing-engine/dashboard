@@ -1,42 +1,35 @@
-const mockUpdateLeadStatus = jest.fn();
-const mockInsertReviewDecision = jest.fn();
 const mockSelectProposalType = jest.fn();
 const mockRevalidatePath = jest.fn();
+const mockFetch = jest.fn();
 
 jest.mock("next/cache", () => ({
   revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
 jest.mock("@/lib/leads", () => ({
-  updateLeadStatus: (...args: unknown[]) => mockUpdateLeadStatus(...args),
-  insertReviewDecision: (...args: unknown[]) =>
-    mockInsertReviewDecision(...args),
   selectProposalType: (...args: unknown[]) => mockSelectProposalType(...args),
 }));
 
-jest.mock("@/lib/evidence-bank", () => ({
-  getEvidenceForAngle: () => [
-    { project_name: "Test", confidence: "strong", snippet: "Test snippet" },
-  ],
-}));
+// Mock global fetch
+global.fetch = mockFetch as unknown as typeof fetch;
 
-import { reviewLead, selectProposal } from "@/app/actions";
+import { reviewLead, selectProposal, generateProposal } from "@/app/actions";
 
 beforeEach(() => {
-  mockUpdateLeadStatus.mockReset();
-  mockInsertReviewDecision.mockReset();
   mockSelectProposalType.mockReset();
   mockRevalidatePath.mockReset();
+  mockFetch.mockReset();
+  mockFetch.mockResolvedValue({ ok: true, text: async () => "{}" });
 });
 
-describe("reviewLead", () => {
-  function makeFormData(data: Record<string, string>): FormData {
-    const fd = new FormData();
-    for (const [k, v] of Object.entries(data)) fd.set(k, v);
-    return fd;
-  }
+function makeFormData(data: Record<string, string>): FormData {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(data)) fd.set(k, v);
+  return fd;
+}
 
-  it("approve_for_draft → updates status to approved_for_draft", async () => {
+describe("reviewLead", () => {
+  it("approve_for_draft → calls WF05 webhook", async () => {
     await reviewLead(
       makeFormData({
         leadId: "lead_1",
@@ -45,36 +38,59 @@ describe("reviewLead", () => {
       }),
     );
 
-    expect(mockInsertReviewDecision).toHaveBeenCalledWith(
-      "lead_1",
-      "approve_for_draft",
-      "Good lead",
-    );
-    expect(mockUpdateLeadStatus).toHaveBeenCalledWith(
-      "lead_1",
-      "approved_for_draft",
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/review-decision"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          lead_id: "lead_1",
+          decision: "approve_for_draft",
+          reviewer: "dashboard",
+          reason: "Good lead",
+        }),
+      }),
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/leads/lead_1");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
   });
 
-  it("archive → updates status to archived", async () => {
+  it("archive → calls WF05 webhook with archive decision", async () => {
     await reviewLead(
       makeFormData({ leadId: "lead_2", decision: "archive", reason: "" }),
     );
 
-    expect(mockUpdateLeadStatus).toHaveBeenCalledWith("lead_2", "archived");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/review-decision"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_2",
+          decision: "archive",
+          reviewer: "dashboard",
+          reason: null,
+        }),
+      }),
+    );
   });
 
-  it("reject → updates status to archived", async () => {
+  it("reject → calls WF05 webhook with reject decision", async () => {
     await reviewLead(
       makeFormData({ leadId: "lead_3", decision: "reject", reason: "" }),
     );
 
-    expect(mockUpdateLeadStatus).toHaveBeenCalledWith("lead_3", "archived");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/review-decision"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_3",
+          decision: "reject",
+          reviewer: "dashboard",
+          reason: null,
+        }),
+      }),
+    );
   });
 
-  it("save_for_later → updates status to scored", async () => {
+  it("save_for_later → calls WF05 webhook", async () => {
     await reviewLead(
       makeFormData({
         leadId: "lead_4",
@@ -83,28 +99,47 @@ describe("reviewLead", () => {
       }),
     );
 
-    expect(mockUpdateLeadStatus).toHaveBeenCalledWith("lead_4", "scored");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/review-decision"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_4",
+          decision: "save_for_later",
+          reviewer: "dashboard",
+          reason: null,
+        }),
+      }),
+    );
   });
 
-  it("re_score → updates status to scored", async () => {
+  it("re_score → calls WF05 webhook", async () => {
     await reviewLead(
       makeFormData({ leadId: "lead_5", decision: "re_score", reason: "" }),
     );
 
-    expect(mockUpdateLeadStatus).toHaveBeenCalledWith("lead_5", "scored");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/review-decision"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_5",
+          decision: "re_score",
+          reviewer: "dashboard",
+          reason: null,
+        }),
+      }),
+    );
   });
 
   it("does nothing when leadId is missing", async () => {
     await reviewLead(makeFormData({ decision: "archive", reason: "" }));
 
-    expect(mockInsertReviewDecision).not.toHaveBeenCalled();
-    expect(mockUpdateLeadStatus).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("does nothing when decision is missing", async () => {
     await reviewLead(makeFormData({ leadId: "lead_1", reason: "" }));
 
-    expect(mockInsertReviewDecision).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it("does nothing for invalid decision", async () => {
@@ -116,29 +151,22 @@ describe("reviewLead", () => {
       }),
     );
 
-    expect(mockInsertReviewDecision).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("passes undefined reason when empty", async () => {
+  it("sends null reason when empty string", async () => {
     await reviewLead(
       makeFormData({ leadId: "lead_1", decision: "archive", reason: "" }),
     );
 
-    expect(mockInsertReviewDecision).toHaveBeenCalledWith(
-      "lead_1",
-      "archive",
-      undefined,
+    const body = JSON.parse(
+      (mockFetch.mock.calls[0][1] as { body: string }).body,
     );
+    expect(body.reason).toBeNull();
   });
 });
 
 describe("selectProposal", () => {
-  function makeFormData(data: Record<string, string>): FormData {
-    const fd = new FormData();
-    for (const [k, v] of Object.entries(data)) fd.set(k, v);
-    return fd;
-  }
-
   it("calls selectProposalType with correct params", async () => {
     await selectProposal(
       makeFormData({ proposalId: "uuid-1", proposalType: "standard" }),
@@ -158,5 +186,62 @@ describe("selectProposal", () => {
     await selectProposal(makeFormData({ proposalId: "uuid-1" }));
 
     expect(mockSelectProposalType).not.toHaveBeenCalled();
+  });
+});
+
+describe("generateProposal", () => {
+  it("calls WF06 webhook with lead_id", async () => {
+    mockFetch.mockResolvedValue({ ok: true, text: async () => "{}" });
+
+    const result = await generateProposal(makeFormData({ leadId: "lead_1" }));
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/generate-proposal"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ lead_id: "lead_1" }),
+      }),
+    );
+    expect(result).toEqual({ success: true });
+  });
+
+  it("returns error when leadId is missing", async () => {
+    const result = await generateProposal(makeFormData({}));
+
+    expect(result).toEqual({ error: "Lead ID requerido" });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("returns error when WF06 responds with error", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: async () => "Internal error",
+    });
+
+    const result = await generateProposal(makeFormData({ leadId: "lead_1" }));
+
+    expect(result).toEqual({
+      error: "Error WF06: 500 — Internal error",
+    });
+  });
+
+  it("returns error when fetch throws", async () => {
+    mockFetch.mockRejectedValue(new Error("Network failure"));
+
+    const result = await generateProposal(makeFormData({ leadId: "lead_1" }));
+
+    expect(result).toEqual({
+      error: "Error generando propuesta: Network failure",
+    });
+  });
+
+  it("revalidates paths on success", async () => {
+    mockFetch.mockResolvedValue({ ok: true, text: async () => "{}" });
+
+    await generateProposal(makeFormData({ leadId: "lead_1" }));
+
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/leads/lead_1");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/");
   });
 });
