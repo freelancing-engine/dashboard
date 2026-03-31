@@ -15,6 +15,7 @@ import {
   Line,
   Legend,
 } from "recharts";
+import type { PieLabelRenderProps } from "recharts";
 import type {
   NameValue,
   ProfileBreakdownItem,
@@ -144,7 +145,10 @@ export function VerdictChart({ data }: { data: NameValue[] }) {
           cx="50%"
           cy="50%"
           outerRadius={100}
-          label={({ label, value }) => `${label}: ${value}`}
+          label={(props: PieLabelRenderProps) => {
+            const d = props.payload as Record<string, unknown>;
+            return `${d.label ?? d.name}: ${props.value}`;
+          }}
         >
           {mapped.map((entry, i) => (
             <Cell key={i} fill={entry.fill} />
@@ -171,7 +175,7 @@ export function PlatformChart({ data }: { data: NameValue[] }) {
           cx="50%"
           cy="50%"
           outerRadius={100}
-          label={({ name, value }) => `${name}: ${value}`}
+          label={(props: PieLabelRenderProps) => `${props.name}: ${props.value}`}
         >
           {data.map((_, i) => (
             <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
