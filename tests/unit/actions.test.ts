@@ -14,6 +14,12 @@ jest.mock("@/lib/leads", () => ({
   selectProposalType: (...args: unknown[]) => mockSelectProposalType(...args),
 }));
 
+jest.mock("@/lib/evidence-bank", () => ({
+  getEvidenceForAngle: () => [
+    { project_name: "Test", confidence: "strong", snippet: "Test snippet" },
+  ],
+}));
+
 import { reviewLead, selectProposal } from "@/app/actions";
 
 beforeEach(() => {

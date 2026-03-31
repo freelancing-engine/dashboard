@@ -6,6 +6,7 @@ import {
   insertReviewDecision,
   selectProposalType,
 } from "@/lib/leads";
+import { getEvidenceForAngle } from "@/lib/evidence-bank";
 
 export async function reviewLead(formData: FormData) {
   const leadId = formData.get("leadId") as string;
@@ -55,12 +56,8 @@ export async function generateProposal(formData: FormData) {
   const leadResult = await pool.query(
     `SELECT lead_id, platform::text, title,
             COALESCE(normalized_description, raw_description) as description,
-            url, client_name, client_country, client_history_summary,
-            client_spend, client_hire_rate,
             budget_type, budget_value, proposal_count,
-            stack_tags, score_total, verdict::text,
-            best_profile_angle::text, best_proposal_type::text,
-            reasoning_summary
+            best_profile_angle::text, best_proposal_type::text
      FROM leads WHERE lead_id = $1`,
     [leadId],
   );
@@ -68,26 +65,26 @@ export async function generateProposal(formData: FormData) {
   const lead = leadResult.rows[0];
   if (!lead) return { error: "Lead no encontrado" };
 
+  const profileAngle = lead.best_profile_angle || "flagship";
+
   const payload = {
-    lead_id: lead.lead_id,
-    platform: lead.platform,
-    title: lead.title,
-    description: lead.description,
-    url: lead.url,
-    client_name: lead.client_name,
-    client_country: lead.client_country,
-    client_history_summary: lead.client_history_summary,
-    client_spend: lead.client_spend,
-    client_hire_rate: lead.client_hire_rate,
-    budget_type: lead.budget_type,
-    budget_value: lead.budget_value,
-    proposal_count: lead.proposal_count,
-    stack_tags: lead.stack_tags || [],
-    score_total: lead.score_total,
-    verdict: lead.verdict,
-    profile_angle: lead.best_profile_angle || "flagship",
-    proposal_type: lead.best_proposal_type || "standard",
-    reasoning_summary: lead.reasoning_summary,
+    lead: {
+      lead_id: lead.lead_id,
+      platform: lead.platform,
+      title: lead.title,
+      description: lead.description,
+      budget_type: lead.budget_type,
+      budget_value: lead.budget_value,
+      proposal_count: lead.proposal_count,
+    },
+    profile_angle: profileAngle,
+    proposal_type_preference: lead.best_proposal_type || "standard",
+    evidence_snippets: getEvidenceForAngle(profileAngle),
+    channel_context: {
+      channel: lead.platform || "upwork",
+      tone_bias: "direct",
+      max_length_preference: "medium",
+    },
     language: "es",
   };
 
