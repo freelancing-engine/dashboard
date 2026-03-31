@@ -140,6 +140,8 @@ export async function generateProposal(formData: FormData) {
     revalidatePath("/");
     return { success: true };
   } catch (err) {
-    return { error: `Error generando propuesta: ${err instanceof Error ? err.message : String(err)}` };
+    return {
+      error: `Error generando propuesta: ${err instanceof Error ? err.message : String(err)}`,
+    };
   }
 }

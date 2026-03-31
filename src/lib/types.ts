@@ -96,7 +96,11 @@ export interface LeadListItem {
   created_at: string;
 }
 
-export type DraftStatus = "generated" | "selected" | "submitted_manually" | "archived";
+export type DraftStatus =
+  | "generated"
+  | "selected"
+  | "submitted_manually"
+  | "archived";
 
 export interface ProposalDraft {
   proposal_id: string;

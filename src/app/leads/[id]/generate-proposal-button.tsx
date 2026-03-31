@@ -28,9 +28,7 @@ export function GenerateProposalButton({
 
   return (
     <div className="rounded-lg border border-dashed border-blue-300 bg-blue-50 p-4">
-      <h2 className="mb-2 font-semibold text-blue-800">
-        Generar propuesta
-      </h2>
+      <h2 className="mb-2 font-semibold text-blue-800">Generar propuesta</h2>
       <p className="mb-3 text-sm text-blue-600">
         El agente generará 3 versiones de propuesta (corta, estándar,
         consultiva) basándose en el análisis del lead.

@@ -49,9 +49,7 @@ export function ProposalPreview({ drafts }: { drafts: ProposalDraft[] }) {
       <div className="mb-3 flex flex-wrap gap-2 text-xs text-gray-500">
         <span>
           Ángulo:{" "}
-          <strong>
-            {activeDraft.profile_angle_used.replace(/_/g, " ")}
-          </strong>
+          <strong>{activeDraft.profile_angle_used.replace(/_/g, " ")}</strong>
         </span>
         <span>·</span>
         <span>
@@ -66,9 +64,7 @@ export function ProposalPreview({ drafts }: { drafts: ProposalDraft[] }) {
             <span>·</span>
             <span>
               Elegida:{" "}
-              <strong>
-                {TYPE_LABELS[activeDraft.selected_proposal_type]}
-              </strong>
+              <strong>{TYPE_LABELS[activeDraft.selected_proposal_type]}</strong>
             </span>
           </>
         )}
@@ -163,7 +159,9 @@ function ProposalTabs({ draft }: { draft: ProposalDraft }) {
               disabled={selecting}
               className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {selecting ? "..." : `Elegir versión ${TYPE_LABELS[activeTab]?.toLowerCase()}`}
+              {selecting
+                ? "..."
+                : `Elegir versión ${TYPE_LABELS[activeTab]?.toLowerCase()}`}
             </button>
           )}
         </div>

@@ -13,7 +13,10 @@ const PROPOSAL_TYPE_LABELS: Record<string, string> = {
   consultative: "Consultiva (220–420 palabras)",
 };
 
-const VERDICT_LABELS: Record<string, { label: string; desc: string; color: string }> = {
+const VERDICT_LABELS: Record<
+  string,
+  { label: string; desc: string; color: string }
+> = {
   apply_now: {
     label: "Aplicar ahora",
     desc: "Lead de alta prioridad — match fuerte con perfil y buen potencial de cierre",
@@ -48,7 +51,8 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
   if (!lead.verdict && !lead.score_total) return null;
 
   const verdict = lead.verdict ? VERDICT_LABELS[lead.verdict] : null;
-  const shouldApply = lead.verdict === "apply_now" || lead.verdict === "strong_maybe";
+  const shouldApply =
+    lead.verdict === "apply_now" || lead.verdict === "strong_maybe";
 
   return (
     <div
@@ -63,41 +67,50 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
         </h2>
       </div>
 
-      {verdict && (
-        <p className="mb-3 text-sm">{verdict.desc}</p>
-      )}
+      {verdict && <p className="mb-3 text-sm">{verdict.desc}</p>}
 
       <div className="grid gap-2 text-sm">
         {lead.best_profile_angle && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">Perfil recomendado:</span>
+            <span className="font-medium text-gray-600 shrink-0">
+              Perfil recomendado:
+            </span>
             <span className="font-semibold">
-              {ANGLE_LABELS[lead.best_profile_angle] || lead.best_profile_angle.replace(/_/g, " ")}
+              {ANGLE_LABELS[lead.best_profile_angle] ||
+                lead.best_profile_angle.replace(/_/g, " ")}
             </span>
           </div>
         )}
 
         {lead.best_proposal_type && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">Tipo de propuesta:</span>
+            <span className="font-medium text-gray-600 shrink-0">
+              Tipo de propuesta:
+            </span>
             <span className="font-semibold">
-              {PROPOSAL_TYPE_LABELS[lead.best_proposal_type] || lead.best_proposal_type}
+              {PROPOSAL_TYPE_LABELS[lead.best_proposal_type] ||
+                lead.best_proposal_type}
             </span>
           </div>
         )}
 
         {lead.next_step && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">Próximo paso:</span>
+            <span className="font-medium text-gray-600 shrink-0">
+              Próximo paso:
+            </span>
             <span className="font-semibold">
-              {NEXT_STEP_LABELS[lead.next_step] || lead.next_step.replace(/_/g, " ")}
+              {NEXT_STEP_LABELS[lead.next_step] ||
+                lead.next_step.replace(/_/g, " ")}
             </span>
           </div>
         )}
 
         {lead.score_total !== null && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">Puntaje total:</span>
+            <span className="font-medium text-gray-600 shrink-0">
+              Puntaje total:
+            </span>
             <span className="font-semibold">{lead.score_total} / 100</span>
           </div>
         )}
@@ -108,7 +121,9 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
           <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">
             Razonamiento del agente
           </h3>
-          <p className="whitespace-pre-wrap text-sm">{lead.reasoning_summary}</p>
+          <p className="whitespace-pre-wrap text-sm">
+            {lead.reasoning_summary}
+          </p>
         </div>
       )}
 
