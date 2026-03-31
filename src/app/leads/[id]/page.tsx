@@ -173,7 +173,7 @@ export default async function LeadDetailPage({
           <ApplicationSuggestion lead={lead} />
 
           {/* Proposal drafts */}
-          <ProposalPreview drafts={drafts} />
+          <ProposalPreview drafts={drafts} lead={lead} />
 
           {/* Generate proposal button */}
           <GenerateProposalButton

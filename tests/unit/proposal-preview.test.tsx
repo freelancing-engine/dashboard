@@ -1,12 +1,56 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { ProposalPreview } from "@/app/leads/[id]/proposal-preview";
-import type { ProposalDraft } from "@/lib/types";
+import type { ProposalDraft, Lead } from "@/lib/types";
 
-// Mock server action
+// Mock server actions
 jest.mock("@/app/actions", () => ({
   selectProposal: jest.fn(),
+  markProposalSubmitted: jest.fn(),
 }));
+
+function makeLead(overrides: Partial<Lead> = {}): Lead {
+  return {
+    lead_id: "lead_test",
+    platform: "upwork",
+    source_type: "manual",
+    title: "Test Lead",
+    raw_description: "Test description",
+    normalized_description: null,
+    url: "https://www.upwork.com/jobs/test",
+    client_name: null,
+    client_country: null,
+    client_history_summary: null,
+    client_spend: null,
+    client_hire_rate: null,
+    budget_type: "fixed",
+    budget_value: "500",
+    proposal_count: null,
+    posted_at: null,
+    received_at: null,
+    stack_tags: [],
+    lead_status: "draft_ready",
+    review_priority: "normal",
+    score_technical_fit: null,
+    score_budget_attractiveness: null,
+    score_feasibility: null,
+    score_timeline_fit: null,
+    score_client_reliability: null,
+    score_competition_risk: null,
+    score_strategic_value: null,
+    score_close_probability: null,
+    score_total: null,
+    verdict: null,
+    red_flags: [],
+    best_profile_angle: null,
+    best_proposal_type: null,
+    next_step: null,
+    reasoning_summary: null,
+    created_at: "2026-03-15T10:00:00Z",
+    updated_at: "2026-03-15T10:00:00Z",
+    ...overrides,
+  };
+}
 
 function makeDraft(overrides: Partial<ProposalDraft> = {}): ProposalDraft {
   return {
@@ -34,19 +78,19 @@ function makeDraft(overrides: Partial<ProposalDraft> = {}): ProposalDraft {
 
 describe("ProposalPreview", () => {
   it("returns null for empty drafts", () => {
-    const { container } = render(<ProposalPreview drafts={[]} />);
+    const { container } = render(<ProposalPreview lead={makeLead()} drafts={[]} />);
     expect(container.innerHTML).toBe("");
   });
 
   it("returns null when no active draft", () => {
     const { container } = render(
-      <ProposalPreview drafts={[makeDraft({ is_active: false })]} />,
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ is_active: false })]} />,
     );
     expect(container.innerHTML).toBe("");
   });
 
   it("renders proposal header", () => {
-    render(<ProposalPreview drafts={[makeDraft()]} />);
+    render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(screen.getByText("Propuesta generada")).toBeInTheDocument();
     expect(screen.getByText("Borrador")).toBeInTheDocument();
@@ -54,7 +98,7 @@ describe("ProposalPreview", () => {
 
   it("renders selected status badge", () => {
     render(
-      <ProposalPreview drafts={[makeDraft({ draft_status: "selected" })]} />,
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ draft_status: "selected" })]} />,
     );
 
     expect(screen.getByText("Seleccionada")).toBeInTheDocument();
@@ -63,6 +107,7 @@ describe("ProposalPreview", () => {
   it("renders submitted_manually status badge", () => {
     render(
       <ProposalPreview
+        lead={makeLead()}
         drafts={[makeDraft({ draft_status: "submitted_manually" })]}
       />,
     );
@@ -71,14 +116,14 @@ describe("ProposalPreview", () => {
   });
 
   it("renders profile angle and recommended type", () => {
-    render(<ProposalPreview drafts={[makeDraft()]} />);
+    render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(screen.getByText(/flagship/)).toBeInTheDocument();
     expect(screen.getAllByText(/Estándar/).length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders all three tabs", () => {
-    render(<ProposalPreview drafts={[makeDraft()]} />);
+    render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(screen.getByText("Corta")).toBeInTheDocument();
     // "Estándar" appears in both the recommended label and the tab
@@ -88,7 +133,7 @@ describe("ProposalPreview", () => {
   });
 
   it("shows recommended tab with star", () => {
-    const { container } = render(<ProposalPreview drafts={[makeDraft()]} />);
+    const { container } = render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(container.querySelector(".text-green-600")).not.toBeNull();
     expect(screen.getByText("★")).toBeInTheDocument();
@@ -97,6 +142,7 @@ describe("ProposalPreview", () => {
   it("renders optional questions", () => {
     render(
       <ProposalPreview
+        lead={makeLead()}
         drafts={[
           makeDraft({
             optional_questions: [
@@ -118,6 +164,7 @@ describe("ProposalPreview", () => {
   it("renders internal note", () => {
     render(
       <ProposalPreview
+        lead={makeLead()}
         drafts={[makeDraft({ internal_note: "Focus on AI experience" })]}
       />,
     );
@@ -128,7 +175,7 @@ describe("ProposalPreview", () => {
 
   it("does not render questions section when empty", () => {
     render(
-      <ProposalPreview drafts={[makeDraft({ optional_questions: [] })]} />,
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ optional_questions: [] })]} />,
     );
 
     expect(
@@ -139,6 +186,7 @@ describe("ProposalPreview", () => {
   it("shows selected proposal type when present", () => {
     render(
       <ProposalPreview
+        lead={makeLead()}
         drafts={[
           makeDraft({
             selected_proposal_type: "short",
@@ -154,6 +202,7 @@ describe("ProposalPreview", () => {
   it("shows word count", () => {
     render(
       <ProposalPreview
+        lead={makeLead()}
         drafts={[makeDraft({ recommended_proposal_type: "standard" })]}
       />,
     );
@@ -163,7 +212,7 @@ describe("ProposalPreview", () => {
   });
 
   it("shows 'Elegir versión' button for generated status", () => {
-    render(<ProposalPreview drafts={[makeDraft()]} />);
+    render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(
       screen.getByRole("button", { name: /Elegir versión/ }),
@@ -172,7 +221,7 @@ describe("ProposalPreview", () => {
 
   it("hides select button for selected status", () => {
     render(
-      <ProposalPreview drafts={[makeDraft({ draft_status: "selected" })]} />,
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ draft_status: "selected" })]} />,
     );
 
     expect(
@@ -182,10 +231,72 @@ describe("ProposalPreview", () => {
 
   it("only renders tabs for present versions", () => {
     render(
-      <ProposalPreview drafts={[makeDraft({ consultative_version: null })]} />,
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ consultative_version: null })]} />,
     );
 
     expect(screen.getByText("Corta")).toBeInTheDocument();
     expect(screen.queryByText("Consultiva")).not.toBeInTheDocument();
+  });
+
+  it("shows connect cost estimate for Upwork leads", () => {
+    render(
+      <ProposalPreview
+        lead={makeLead({ platform: "upwork", budget_type: "fixed", budget_value: "500" })}
+        drafts={[makeDraft()]}
+      />,
+    );
+
+    expect(screen.getByText(/connects/)).toBeInTheDocument();
+  });
+
+  it("hides connect cost for non-Upwork platforms", () => {
+    render(
+      <ProposalPreview
+        lead={makeLead({ platform: "linkedin" })}
+        drafts={[makeDraft()]}
+      />,
+    );
+
+    expect(screen.queryByText(/connects/)).not.toBeInTheDocument();
+  });
+
+  it("shows copy button", () => {
+    render(
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />,
+    );
+
+    expect(screen.getByRole("button", { name: "Copiar" })).toBeInTheDocument();
+  });
+
+  it("shows submit button for generated drafts", () => {
+    render(
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Marcar como enviada" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows Upwork link when lead has URL", () => {
+    render(
+      <ProposalPreview
+        lead={makeLead({ url: "https://www.upwork.com/jobs/test" })}
+        drafts={[makeDraft()]}
+      />,
+    );
+
+    expect(screen.getByText("Ir a Upwork ↗")).toBeInTheDocument();
+  });
+
+  it("hides Upwork link when lead has no URL", () => {
+    render(
+      <ProposalPreview
+        lead={makeLead({ url: null })}
+        drafts={[makeDraft()]}
+      />,
+    );
+
+    expect(screen.queryByText("Ir a Upwork ↗")).not.toBeInTheDocument();
   });
 });

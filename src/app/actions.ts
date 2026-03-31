@@ -1,10 +1,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { selectProposalType } from "@/lib/leads";
+import { selectProposalType, markProposalSubmitted as dbMarkSubmitted } from "@/lib/leads";
 
 const N8N_WEBHOOK_URL =
   process.env.N8N_WEBHOOK_URL || "http://n8n:5678/webhook";
+
+const ERROR_MAP: Record<string, string> = {
+  "expected approved_for_draft":
+    "El lead debe estar aprobado para draft antes de generar propuesta. Usá 'Aprobar para draft' primero.",
+  "Lead not found": "Lead no encontrado en la base de datos.",
+  "already has active proposal": "Ya existe una propuesta activa para este lead.",
+};
+
+function friendlyError(msg: string): string {
+  for (const [key, friendly] of Object.entries(ERROR_MAP)) {
+    if (msg.includes(key)) return friendly;
+  }
+  return msg;
+}
 
 export async function reviewLead(formData: FormData) {
   const leadId = formData.get("leadId") as string;
@@ -66,7 +80,15 @@ export async function generateProposal(formData: FormData) {
 
     if (!resp.ok) {
       const errBody = await resp.text();
-      return { error: `Error WF06: ${resp.status} — ${errBody}` };
+      try {
+        const parsed = JSON.parse(errBody);
+        if (parsed.error) {
+          return { error: friendlyError(parsed.error) };
+        }
+      } catch {
+        // not JSON
+      }
+      return { error: `Error al generar propuesta (${resp.status})` };
     }
 
     // WF06 handles: agent-service call, proposal_drafts insert,
@@ -80,4 +102,16 @@ export async function generateProposal(formData: FormData) {
       error: `Error generando propuesta: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
+}
+
+export async function markProposalSubmitted(formData: FormData) {
+  const proposalId = formData.get("proposalId") as string;
+  const leadId = formData.get("leadId") as string;
+
+  if (!proposalId || !leadId) return;
+
+  await dbMarkSubmitted(proposalId, leadId);
+
+  revalidatePath(`/leads/${leadId}`);
+  revalidatePath("/");
 }

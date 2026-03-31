@@ -1,4 +1,5 @@
 const mockSelectProposalType = jest.fn();
+const mockMarkProposalSubmitted = jest.fn();
 const mockRevalidatePath = jest.fn();
 const mockFetch = jest.fn();
 
@@ -8,15 +9,23 @@ jest.mock("next/cache", () => ({
 
 jest.mock("@/lib/leads", () => ({
   selectProposalType: (...args: unknown[]) => mockSelectProposalType(...args),
+  markProposalSubmitted: (...args: unknown[]) =>
+    mockMarkProposalSubmitted(...args),
 }));
 
 // Mock global fetch
 global.fetch = mockFetch as unknown as typeof fetch;
 
-import { reviewLead, selectProposal, generateProposal } from "@/app/actions";
+import {
+  reviewLead,
+  selectProposal,
+  generateProposal,
+  markProposalSubmitted,
+} from "@/app/actions";
 
 beforeEach(() => {
   mockSelectProposalType.mockReset();
+  mockMarkProposalSubmitted.mockReset();
   mockRevalidatePath.mockReset();
   mockFetch.mockReset();
   mockFetch.mockResolvedValue({ ok: true, text: async () => "{}" });
@@ -222,7 +231,25 @@ describe("generateProposal", () => {
     const result = await generateProposal(makeFormData({ leadId: "lead_1" }));
 
     expect(result).toEqual({
-      error: "Error WF06: 500 — Internal error",
+      error: "Error al generar propuesta (500)",
+    });
+  });
+
+  it("returns friendly error for JSON error response", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 422,
+      text: async () =>
+        JSON.stringify({
+          error: "Lead status is scored, expected approved_for_draft",
+        }),
+    });
+
+    const result = await generateProposal(makeFormData({ leadId: "lead_1" }));
+
+    expect(result).toEqual({
+      error:
+        "El lead debe estar aprobado para draft antes de generar propuesta. Usá 'Aprobar para draft' primero.",
     });
   });
 
@@ -243,5 +270,29 @@ describe("generateProposal", () => {
 
     expect(mockRevalidatePath).toHaveBeenCalledWith("/leads/lead_1");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+  });
+});
+
+describe("markProposalSubmitted", () => {
+  it("calls db markProposalSubmitted and revalidates", async () => {
+    await markProposalSubmitted(
+      makeFormData({ proposalId: "uuid-1", leadId: "lead_1" }),
+    );
+
+    expect(mockMarkProposalSubmitted).toHaveBeenCalledWith("uuid-1", "lead_1");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/leads/lead_1");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("does nothing when proposalId is missing", async () => {
+    await markProposalSubmitted(makeFormData({ leadId: "lead_1" }));
+
+    expect(mockMarkProposalSubmitted).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when leadId is missing", async () => {
+    await markProposalSubmitted(makeFormData({ proposalId: "uuid-1" }));
+
+    expect(mockMarkProposalSubmitted).not.toHaveBeenCalled();
   });
 });

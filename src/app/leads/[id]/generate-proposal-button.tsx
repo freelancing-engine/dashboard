@@ -44,7 +44,16 @@ export function GenerateProposalButton({
         </button>
       </form>
       {state && "error" in state && state.error && (
-        <p className="mt-2 text-sm text-red-600">{state.error}</p>
+        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-700">{state.error}</p>
+        </div>
+      )}
+      {state && "success" in state && state.success && (
+        <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3">
+          <p className="text-sm text-green-700">
+            Propuesta generada. Recargá la página para verla.
+          </p>
+        </div>
       )}
     </div>
   );

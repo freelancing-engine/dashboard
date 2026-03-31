@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { ProposalDraft } from "@/lib/types";
-import { selectProposal } from "../../actions";
+import type { ProposalDraft, Lead } from "@/lib/types";
+import { selectProposal, markProposalSubmitted } from "../../actions";
 
 const TYPE_LABELS: Record<string, string> = {
   short: "Corta",
@@ -23,27 +23,57 @@ const STATUS_BADGE: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
-export function ProposalPreview({ drafts }: { drafts: ProposalDraft[] }) {
+function estimateConnectCost(lead: Lead): { connects: number; usd: string } | null {
+  if (lead.platform !== "upwork") return null;
+
+  const budget = parseFloat(lead.budget_value || "0");
+  let connects: number;
+
+  if (lead.budget_type === "hourly" || !budget || budget === 0) {
+    connects = 6;
+  } else if (budget < 100) {
+    connects = 4;
+  } else if (budget < 500) {
+    connects = 6;
+  } else if (budget < 1000) {
+    connects = 10;
+  } else {
+    connects = 16;
+  }
+
+  return { connects, usd: (connects * 0.15).toFixed(2) };
+}
+
+export function ProposalPreview({ drafts, lead }: { drafts: ProposalDraft[]; lead: Lead }) {
   if (drafts.length === 0) return null;
 
   const activeDraft = drafts.find((d) => d.is_active);
   if (!activeDraft) return null;
 
+  const connectCost = estimateConnectCost(lead);
+
   return (
     <div className="rounded-lg border bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-semibold">Propuesta generada</h2>
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[activeDraft.draft_status] || "bg-gray-100"}`}
-        >
-          {activeDraft.draft_status === "generated"
-            ? "Borrador"
-            : activeDraft.draft_status === "selected"
-              ? "Seleccionada"
-              : activeDraft.draft_status === "submitted_manually"
-                ? "Enviada"
-                : "Archivada"}
-        </span>
+        <div className="flex items-center gap-2">
+          {connectCost && (
+            <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700" title="Costo estimado de Upwork Connects">
+              ~{connectCost.connects} connects (${connectCost.usd})
+            </span>
+          )}
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[activeDraft.draft_status] || "bg-gray-100"}`}
+          >
+            {activeDraft.draft_status === "generated"
+              ? "Borrador"
+              : activeDraft.draft_status === "selected"
+                ? "Seleccionada"
+                : activeDraft.draft_status === "submitted_manually"
+                  ? "Enviada"
+                  : "Archivada"}
+          </span>
+        </div>
       </div>
 
       <div className="mb-3 flex flex-wrap gap-2 text-xs text-gray-500">
@@ -70,7 +100,7 @@ export function ProposalPreview({ drafts }: { drafts: ProposalDraft[] }) {
         )}
       </div>
 
-      <ProposalTabs draft={activeDraft} />
+      <ProposalTabs draft={activeDraft} lead={lead} />
 
       {activeDraft.optional_questions?.length > 0 && (
         <div className="mt-4 rounded bg-amber-50 p-3">
@@ -97,7 +127,7 @@ export function ProposalPreview({ drafts }: { drafts: ProposalDraft[] }) {
   );
 }
 
-function ProposalTabs({ draft }: { draft: ProposalDraft }) {
+function ProposalTabs({ draft, lead }: { draft: ProposalDraft; lead: Lead }) {
   const tabs = [
     { key: "short" as const, text: draft.short_version },
     { key: "standard" as const, text: draft.standard_version },
@@ -111,6 +141,8 @@ function ProposalTabs({ draft }: { draft: ProposalDraft }) {
     "short";
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [selecting, setSelecting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const activeText = tabs.find((t) => t.key === activeTab)?.text;
 
@@ -122,6 +154,26 @@ function ProposalTabs({ draft }: { draft: ProposalDraft }) {
     await selectProposal(fd);
     setSelecting(false);
   }
+
+  async function handleCopy() {
+    if (!activeText) return;
+    await navigator.clipboard.writeText(activeText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    const fd = new FormData();
+    fd.set("proposalId", draft.proposal_id);
+    fd.set("leadId", lead.lead_id);
+    await markProposalSubmitted(fd);
+    setSubmitting(false);
+  }
+
+  const canSubmit =
+    draft.draft_status === "selected" ||
+    draft.draft_status === "generated";
 
   return (
     <div>
@@ -153,17 +205,45 @@ function ProposalTabs({ draft }: { draft: ProposalDraft }) {
           <span className="text-xs text-gray-400">
             {activeText ? activeText.split(/\s+/).length : 0} palabras
           </span>
-          {draft.draft_status === "generated" && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleSelect}
-              disabled={selecting}
-              className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              onClick={handleCopy}
+              className="rounded border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
             >
-              {selecting
-                ? "..."
-                : `Elegir versión ${TYPE_LABELS[activeTab]?.toLowerCase()}`}
+              {copied ? "✓ Copiado" : "Copiar"}
             </button>
-          )}
+            {draft.draft_status === "generated" && (
+              <button
+                onClick={handleSelect}
+                disabled={selecting}
+                className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              >
+                {selecting
+                  ? "..."
+                  : `Elegir versión ${TYPE_LABELS[activeTab]?.toLowerCase()}`}
+              </button>
+            )}
+            {canSubmit && lead.url && (
+              <a
+                href={lead.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+              >
+                Ir a Upwork ↗
+              </a>
+            )}
+            {canSubmit && (
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="rounded bg-purple-600 px-3 py-1 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+                title="Marca la propuesta como enviada manualmente"
+              >
+                {submitting ? "..." : "Marcar como enviada"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

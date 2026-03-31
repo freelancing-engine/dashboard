@@ -157,3 +157,21 @@ export async function selectProposalType(
     [proposalType, proposalId],
   );
 }
+
+export async function markProposalSubmitted(
+  proposalId: string,
+  leadId: string,
+): Promise<void> {
+  await pool.query(
+    `UPDATE proposal_drafts
+     SET draft_status = 'submitted_manually'
+     WHERE proposal_id = $1`,
+    [proposalId],
+  );
+  await pool.query(
+    `UPDATE leads
+     SET lead_status = 'applied_manually'
+     WHERE lead_id = $1`,
+    [leadId],
+  );
+}
