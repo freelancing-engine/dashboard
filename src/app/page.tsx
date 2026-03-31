@@ -2,6 +2,7 @@ import { getLeads, getStatusCounts, getScoreStats } from "@/lib/leads";
 import { LeadTable } from "./components/lead-table";
 import { StatsBar } from "./components/stats-bar";
 import { Filters } from "./components/filters";
+import Link from "next/link";
 
 interface PageProps {
   searchParams: Promise<{
@@ -38,7 +39,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="mb-6 text-2xl font-bold">Freelancing Engine — Leads</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Freelancing Engine — Leads</h1>
+        <Link
+          href="/metrics"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Ver métricas
+        </Link>
+      </div>
 
       <StatsBar statusCounts={statusCounts} scoreStats={scoreStats} />
 

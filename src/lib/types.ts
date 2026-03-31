@@ -146,3 +146,29 @@ export interface ScoreDistribution {
   range: string;
   count: number;
 }
+
+export interface NameValue {
+  name: string;
+  value: number;
+}
+
+export interface ProfileBreakdownItem {
+  name: string;
+  value: number;
+  avg_score: number;
+}
+
+export interface DailyIntakeItem {
+  date: string;
+  count: number;
+}
+
+export interface MetricsData {
+  statusBreakdown: NameValue[];
+  scoreStats: { avg: number; min: number; max: number; total: number };
+  verdictBreakdown: NameValue[];
+  platformBreakdown: NameValue[];
+  profileBreakdown: ProfileBreakdownItem[];
+  dailyIntake: DailyIntakeItem[];
+  scoreDistribution: ScoreDistribution[];
+}

@@ -1,5 +1,11 @@
 import pool from "./db";
-import type { Lead, LeadListItem, ProposalDraft, StatusCount } from "./types";
+import type {
+  Lead,
+  LeadListItem,
+  ProposalDraft,
+  StatusCount,
+  MetricsData,
+} from "./types";
 
 export async function getLeads(filters?: {
   status?: string;
@@ -175,4 +181,76 @@ export async function markProposalSubmitted(
      WHERE lead_id = $1`,
     [leadId],
   );
+}
+
+// ---------------------------------------------------------------------------
+// Metrics
+// ---------------------------------------------------------------------------
+
+export async function getMetrics(): Promise<MetricsData> {
+  const [
+    statusRows,
+    scoreStats,
+    verdictRows,
+    platformRows,
+    profileRows,
+    dailyRows,
+    scoreDistRows,
+  ] = await Promise.all([
+    pool.query(
+      `SELECT lead_status::text as name, COUNT(*)::int as value
+       FROM leads GROUP BY lead_status ORDER BY value DESC`,
+    ),
+    pool.query(
+      `SELECT
+         ROUND(AVG(score_total))::int as avg,
+         MIN(score_total)::int as min,
+         MAX(score_total)::int as max,
+         COUNT(*)::int as total
+       FROM leads WHERE score_total IS NOT NULL`,
+    ),
+    pool.query(
+      `SELECT COALESCE(verdict::text, 'sin_veredicto') as name, COUNT(*)::int as value
+       FROM leads GROUP BY verdict ORDER BY value DESC`,
+    ),
+    pool.query(
+      `SELECT platform::text as name, COUNT(*)::int as value
+       FROM leads GROUP BY platform ORDER BY value DESC`,
+    ),
+    pool.query(
+      `SELECT COALESCE(best_profile_angle::text, 'sin_perfil') as name,
+              COUNT(*)::int as value,
+              ROUND(AVG(score_total))::int as avg_score
+       FROM leads GROUP BY best_profile_angle ORDER BY value DESC`,
+    ),
+    pool.query(
+      `SELECT date(created_at)::text as date, COUNT(*)::int as count
+       FROM leads GROUP BY date(created_at) ORDER BY date`,
+    ),
+    pool.query(
+      `SELECT
+         CASE
+           WHEN score_total >= 80 THEN '80-100'
+           WHEN score_total >= 70 THEN '70-79'
+           WHEN score_total >= 60 THEN '60-69'
+           WHEN score_total >= 50 THEN '50-59'
+           WHEN score_total >= 40 THEN '40-49'
+           ELSE '0-39'
+         END as range,
+         COUNT(*)::int as count
+       FROM leads WHERE score_total IS NOT NULL
+       GROUP BY range
+       ORDER BY range`,
+    ),
+  ]);
+
+  return {
+    statusBreakdown: statusRows.rows,
+    scoreStats: scoreStats.rows[0] || { avg: 0, min: 0, max: 0, total: 0 },
+    verdictBreakdown: verdictRows.rows,
+    platformBreakdown: platformRows.rows,
+    profileBreakdown: profileRows.rows,
+    dailyIntake: dailyRows.rows,
+    scoreDistribution: scoreDistRows.rows,
+  };
 }
