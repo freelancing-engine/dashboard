@@ -41,12 +41,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Freelancing Engine — Leads</h1>
-        <Link
-          href="/metrics"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Ver métricas
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/profiles"
+            className="rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+          >
+            Profile Builder
+          </Link>
+          <Link
+            href="/metrics"
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Ver métricas
+          </Link>
+        </div>
       </div>
 
       <StatsBar statusCounts={statusCounts} scoreStats={scoreStats} />
