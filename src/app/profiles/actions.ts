@@ -1,6 +1,5 @@
 "use server";
 
-import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -9,6 +8,24 @@ const ALLOWED_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "text/plain",
 ];
+
+async function extractPdfText(data: Uint8Array): Promise<string> {
+  // Use pdfjs-dist legacy build directly — no workers needed for Node.js
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.mjs");
+  const doc = await pdfjsLib.getDocument({ data }).promise;
+  const pages: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item: { str?: string }) => item.str ?? "")
+      .join(" ");
+    pages.push(pageText);
+  }
+  await doc.destroy();
+  return pages.join("\n");
+}
 
 export async function extractTextFromFile(
   formData: FormData,
@@ -31,10 +48,7 @@ export async function extractTextFromFile(
     const buffer = Buffer.from(arrayBuffer);
 
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      const parser = new PDFParse({ data: new Uint8Array(arrayBuffer) });
-      const result = await parser.getText();
-      const text = result.text.trim();
-      await parser.destroy();
+      const text = (await extractPdfText(new Uint8Array(arrayBuffer))).trim();
       if (!text)
         return { error: "No se pudo extraer texto del PDF. ¿Está escaneado?" };
       return { text };

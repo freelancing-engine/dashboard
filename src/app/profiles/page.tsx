@@ -93,6 +93,11 @@ export default function ProfileBuilderPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileInputRef = useRef<HTMLInputElement>(null);
+  const [currentProfile, setCurrentProfile] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -169,6 +174,21 @@ export default function ProfileBuilderPage() {
     setSelectedPlatforms((prev) =>
       prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v],
     );
+
+  const handleImportCurrentProfile = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      setCurrentProfile(data);
+    } catch {
+      setError("Error al leer el archivo de perfil actual");
+    }
+    if (profileInputRef.current) profileInputRef.current.value = "";
+  };
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
@@ -475,6 +495,86 @@ export default function ProfileBuilderPage() {
             </div>
           )}
 
+          {/* Import current profile for diff */}
+          <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">Comparar con perfil actual</h3>
+                <p className="text-xs text-gray-500">
+                  Importá el archivo{" "}
+                  <code className="rounded bg-gray-100 px-1">
+                    current_profile.json
+                  </code>{" "}
+                  generado por{" "}
+                  <code className="rounded bg-gray-100 px-1">
+                    upwork-sync profile
+                  </code>
+                </p>
+              </div>
+              {currentProfile ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-green-600">
+                    ✓ Perfil importado
+                  </span>
+                  <button
+                    onClick={() => setCurrentProfile(null)}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => profileInputRef.current?.click()}
+                  className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                >
+                  Importar perfil
+                </button>
+              )}
+              <input
+                ref={profileInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImportCurrentProfile}
+              />
+            </div>
+            {currentProfile && (
+              <div className="mt-3 rounded border bg-gray-50 p-3 text-sm">
+                {(currentProfile.title as string) && (
+                  <p>
+                    <span className="font-medium">Título actual:</span>{" "}
+                    {currentProfile.title as string}
+                  </p>
+                )}
+                {(currentProfile.overview as string) && (
+                  <p className="mt-1 text-gray-600">
+                    {(currentProfile.overview as string).slice(0, 120)}...
+                  </p>
+                )}
+                {Array.isArray(currentProfile.skills) && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {(currentProfile.skills as string[])
+                      .slice(0, 8)
+                      .map((s) => (
+                        <span
+                          key={s}
+                          className="rounded bg-gray-200 px-2 py-0.5 text-xs"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    {(currentProfile.skills as string[]).length > 8 && (
+                      <span className="text-xs text-gray-400">
+                        +{(currentProfile.skills as string[]).length - 8} más
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Profiles */}
           {profiles.profiles.map((profile) => (
             <div
@@ -498,6 +598,16 @@ export default function ProfileBuilderPage() {
                           <label className="text-xs font-medium text-gray-400">
                             Título
                           </label>
+                          {currentProfile &&
+                            platform === "upwork" &&
+                            (currentProfile.title as string) &&
+                            pData.title !==
+                              (currentProfile.title as string) && (
+                              <DiffIndicator
+                                current={currentProfile.title as string}
+                                generated={pData.title}
+                              />
+                            )}
                           <CopyableField text={pData.title} />
                         </div>
                       )}
@@ -514,6 +624,21 @@ export default function ProfileBuilderPage() {
                           <label className="text-xs font-medium text-gray-400">
                             Overview
                           </label>
+                          {currentProfile &&
+                            platform === "upwork" &&
+                            (currentProfile.overview as string) &&
+                            pData.overview !==
+                              (currentProfile.overview as string) && (
+                              <DiffIndicator
+                                current={
+                                  (currentProfile.overview as string).slice(
+                                    0,
+                                    150,
+                                  ) + "..."
+                                }
+                                generated={pData.overview.slice(0, 150) + "..."}
+                              />
+                            )}
                           <CopyableField text={pData.overview} multiline />
                         </div>
                       )}
@@ -551,6 +676,16 @@ export default function ProfileBuilderPage() {
                           </div>
                         </div>
                       )}
+                      {/* Skills diff */}
+                      {currentProfile &&
+                        platform === "upwork" &&
+                        Array.isArray(currentProfile.skills) &&
+                        pData.suggested_tags.length > 0 && (
+                          <SkillsDiff
+                            currentSkills={currentProfile.skills as string[]}
+                            suggestedTags={pData.suggested_tags}
+                          />
+                        )}
                       {pData.selected_proof_points.length > 0 && (
                         <div>
                           <label className="text-xs font-medium text-gray-400">
@@ -622,6 +757,95 @@ function CopyableField({
       >
         {copied ? "✓ Copiado" : "Copiar"}
       </button>
+    </div>
+  );
+}
+
+function DiffIndicator({
+  current,
+  generated,
+}: {
+  current: string;
+  generated: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-1 mb-1">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700"
+      >
+        <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
+        Diferente al perfil actual
+        <span className="text-gray-400">{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && (
+        <div className="mt-1 rounded border border-amber-200 bg-amber-50 p-2 text-xs">
+          <div className="mb-1">
+            <span className="font-medium text-red-600">Actual:</span>{" "}
+            <span className="text-gray-600">{current}</span>
+          </div>
+          <div>
+            <span className="font-medium text-green-600">Generado:</span>{" "}
+            <span className="text-gray-600">{generated}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SkillsDiff({
+  currentSkills,
+  suggestedTags,
+}: {
+  currentSkills: string[];
+  suggestedTags: string[];
+}) {
+  const currentSet = new Set(currentSkills.map((s) => s.toLowerCase()));
+  const suggestedSet = new Set(suggestedTags.map((s) => s.toLowerCase()));
+  const added = suggestedTags.filter((s) => !currentSet.has(s.toLowerCase()));
+  const removed = currentSkills.filter(
+    (s) => !suggestedSet.has(s.toLowerCase()),
+  );
+
+  if (added.length === 0 && removed.length === 0) return null;
+
+  return (
+    <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs">
+      <label className="mb-1 block font-medium text-amber-700">
+        Diferencias en skills/tags
+      </label>
+      {added.length > 0 && (
+        <div className="mb-1 flex flex-wrap gap-1">
+          <span className="text-green-600">+ Agregar:</span>
+          {added.map((s) => (
+            <span
+              key={s}
+              className="rounded bg-green-100 px-2 py-0.5 text-green-700"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
+      {removed.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          <span className="text-red-600">- No en sugeridos:</span>
+          {removed.slice(0, 10).map((s) => (
+            <span
+              key={s}
+              className="rounded bg-red-100 px-2 py-0.5 text-red-700"
+            >
+              {s}
+            </span>
+          ))}
+          {removed.length > 10 && (
+            <span className="text-gray-500">+{removed.length - 10} más</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
