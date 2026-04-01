@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { extractTextFromFile } from "./actions";
 
 const AGENT_SERVICE_URL =
   process.env.NEXT_PUBLIC_AGENT_SERVICE_URL || "http://localhost:8000";
-const AGENT_SERVICE_TOKEN =
-  process.env.NEXT_PUBLIC_AGENT_SERVICE_TOKEN || "";
+const AGENT_SERVICE_TOKEN = process.env.NEXT_PUBLIC_AGENT_SERVICE_TOKEN || "";
 
 const PROFILE_ANGLES = [
   { value: "flagship", label: "Flagship" },
@@ -66,6 +66,9 @@ async function callAgent(endpoint: string, body: object) {
     },
     body: JSON.stringify(body),
   });
+  if (!res.ok) {
+    throw new Error(`Agent service error (${res.status})`);
+  }
   const data = await res.json();
   if (data.status !== "success") {
     throw new Error(data.error?.message || "Unknown error");
@@ -87,6 +90,36 @@ export default function ProfileBuilderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError(null);
+    setFileName(file.name);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await extractTextFromFile(formData);
+      if ("error" in result) {
+        setError(result.error);
+        setFileName(null);
+      } else {
+        setCvText(result.text);
+      }
+    } catch {
+      setError("Error al procesar el archivo");
+      setFileName(null);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleParseCV = async () => {
     setLoading(true);
@@ -152,16 +185,14 @@ export default function ProfileBuilderPage() {
           <div
             key={s}
             className={`flex h-8 w-8 items-center justify-center rounded-full font-bold ${
-              step >= s
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-500"
+              step >= s ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
             }`}
           >
             {s}
           </div>
         ))}
         <span className="text-gray-500">
-          {step === 1 && "Pegar CV"}
+          {step === 1 && "Subir o pegar CV"}
           {step === 2 && "Revisar análisis"}
           {step === 3 && "Perfiles generados"}
         </span>
@@ -173,15 +204,102 @@ export default function ProfileBuilderPage() {
         </div>
       )}
 
-      {/* Step 1: Paste CV */}
+      {/* Step 1: Upload or Paste CV */}
       {step === 1 && (
         <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold">
-            Paso 1: Pegar tu CV / Resume
+          <h2 className="mb-4 text-lg font-semibold">
+            Paso 1: Subir o pegar tu CV
           </h2>
+
+          {/* File upload zone */}
+          <div className="mb-4">
+            <div
+              className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 transition-colors hover:border-blue-400 hover:bg-blue-50"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.add("border-blue-400", "bg-blue-50");
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.classList.remove(
+                  "border-blue-400",
+                  "bg-blue-50",
+                );
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove(
+                  "border-blue-400",
+                  "bg-blue-50",
+                );
+                const file = e.dataTransfer.files?.[0];
+                if (file && fileInputRef.current) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileInputRef.current.files = dt.files;
+                  fileInputRef.current.dispatchEvent(
+                    new Event("change", { bubbles: true }),
+                  );
+                }
+              }}
+            >
+              {uploading ? (
+                <span className="text-sm text-blue-600">
+                  Procesando archivo...
+                </span>
+              ) : fileName ? (
+                <div className="text-center">
+                  <span className="text-sm font-medium text-green-700">
+                    ✓ {fileName}
+                  </span>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Texto extraído correctamente. Podés editarlo abajo.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <svg
+                    className="mb-2 h-8 w-8 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">
+                    Arrastrá un archivo o hacé click para seleccionar
+                  </span>
+                  <span className="mt-1 text-xs text-gray-500">
+                    PDF, DOCX o TXT — máximo 10 MB
+                  </span>
+                </>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </div>
+
+          <div className="mb-3 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="text-xs text-gray-400">
+              o pegá el texto directamente
+            </span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+
           <textarea
             className="mb-3 w-full rounded-lg border p-3 text-sm focus:border-blue-500 focus:outline-none"
-            rows={16}
+            rows={12}
             placeholder="Pegá el texto completo de tu CV aquí..."
             value={cvText}
             onChange={(e) => setCvText(e.target.value)}
@@ -369,87 +487,85 @@ export default function ProfileBuilderPage() {
                 </h2>
               </div>
               <div className="p-6">
-                {Object.entries(profile.platforms).map(
-                  ([platform, pData]) => (
-                    <div key={platform} className="mb-6 last:mb-0">
-                      <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
-                        {platform}
-                      </h3>
-                      <div className="space-y-3">
-                        {pData.title && (
-                          <div>
-                            <label className="text-xs font-medium text-gray-400">
-                              Título
-                            </label>
-                            <CopyableField text={pData.title} />
+                {Object.entries(profile.platforms).map(([platform, pData]) => (
+                  <div key={platform} className="mb-6 last:mb-0">
+                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
+                      {platform}
+                    </h3>
+                    <div className="space-y-3">
+                      {pData.title && (
+                        <div>
+                          <label className="text-xs font-medium text-gray-400">
+                            Título
+                          </label>
+                          <CopyableField text={pData.title} />
+                        </div>
+                      )}
+                      {pData.headline && (
+                        <div>
+                          <label className="text-xs font-medium text-gray-400">
+                            Headline
+                          </label>
+                          <CopyableField text={pData.headline} />
+                        </div>
+                      )}
+                      {pData.overview && (
+                        <div>
+                          <label className="text-xs font-medium text-gray-400">
+                            Overview
+                          </label>
+                          <CopyableField text={pData.overview} multiline />
+                        </div>
+                      )}
+                      {pData.key_services.length > 0 && (
+                        <div>
+                          <label className="text-xs font-medium text-gray-400">
+                            Servicios clave
+                          </label>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {pData.key_services.map((s) => (
+                              <span
+                                key={s}
+                                className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+                              >
+                                {s}
+                              </span>
+                            ))}
                           </div>
-                        )}
-                        {pData.headline && (
-                          <div>
-                            <label className="text-xs font-medium text-gray-400">
-                              Headline
-                            </label>
-                            <CopyableField text={pData.headline} />
+                        </div>
+                      )}
+                      {pData.suggested_tags.length > 0 && (
+                        <div>
+                          <label className="text-xs font-medium text-gray-400">
+                            Tags sugeridos
+                          </label>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {pData.suggested_tags.map((t) => (
+                              <span
+                                key={t}
+                                className="rounded bg-gray-100 px-2 py-0.5 text-xs"
+                              >
+                                {t}
+                              </span>
+                            ))}
                           </div>
-                        )}
-                        {pData.overview && (
-                          <div>
-                            <label className="text-xs font-medium text-gray-400">
-                              Overview
-                            </label>
-                            <CopyableField text={pData.overview} multiline />
-                          </div>
-                        )}
-                        {pData.key_services.length > 0 && (
-                          <div>
-                            <label className="text-xs font-medium text-gray-400">
-                              Servicios clave
-                            </label>
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {pData.key_services.map((s) => (
-                                <span
-                                  key={s}
-                                  className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
-                                >
-                                  {s}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {pData.suggested_tags.length > 0 && (
-                          <div>
-                            <label className="text-xs font-medium text-gray-400">
-                              Tags sugeridos
-                            </label>
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {pData.suggested_tags.map((t) => (
-                                <span
-                                  key={t}
-                                  className="rounded bg-gray-100 px-2 py-0.5 text-xs"
-                                >
-                                  {t}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {pData.selected_proof_points.length > 0 && (
-                          <div>
-                            <label className="text-xs font-medium text-gray-400">
-                              Proof points
-                            </label>
-                            <ul className="mt-1 list-inside list-disc text-sm text-gray-600">
-                              {pData.selected_proof_points.map((p, i) => (
-                                <li key={i}>{p}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
+                      {pData.selected_proof_points.length > 0 && (
+                        <div>
+                          <label className="text-xs font-medium text-gray-400">
+                            Proof points
+                          </label>
+                          <ul className="mt-1 list-inside list-disc text-sm text-gray-600">
+                            {pData.selected_proof_points.map((p, i) => (
+                              <li key={i}>{p}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                  ),
-                )}
+                  </div>
+                ))}
               </div>
             </div>
           ))}
