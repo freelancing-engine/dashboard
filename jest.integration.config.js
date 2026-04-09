@@ -1,6 +1,6 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  testEnvironment: "jsdom",
+  testEnvironment: "node",
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
@@ -13,12 +13,7 @@ module.exports = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   modulePathIgnorePatterns: ["<rootDir>/.next/"],
-  setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/.next/", "/tests/e2e/", "/tests/integration/"],
-  collectCoverageFrom: [
-    "src/**/*.{ts,tsx}",
-    "!src/**/*.d.ts",
-    "!src/app/layout.tsx",
-    "!src/app/globals.css",
-  ],
+  testMatch: ["<rootDir>/tests/integration/**/*.test.ts"],
+  globalSetup: "<rootDir>/tests/integration/global-setup.ts",
+  globalTeardown: "<rootDir>/tests/integration/global-teardown.ts",
 };

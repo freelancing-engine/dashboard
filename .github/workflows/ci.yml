@@ -32,6 +32,67 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npx jest --passWithNoTests --ci
 
+  test-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npx jest --config jest.integration.config.js --ci
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: freelancing_engine_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Apply database schema
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE freelancing_engine;" && PGPASSWORD=postgres psql -h localhost -U postgres -d freelancing_engine -f tests/integration/schema.sql
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --reporter=github
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: freelancing_engine
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
   build:
     runs-on: ubuntu-latest
     steps:
