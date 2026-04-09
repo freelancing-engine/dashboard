@@ -33,3 +33,7 @@ Runs on port 3000 by default (`DASHBOARD_PORT` env var).
 - Tailwind CSS v4
 - PostgreSQL via `pg` driver
 - TypeScript
+
+## License
+
+Proprietary. Copyright (c) 2026 Agustin Andreacchi. All rights reserved. See [LICENSE](LICENSE).
