@@ -40,6 +40,7 @@ function makeLead(overrides: Partial<Lead> = {}): Lead {
     best_proposal_type: "standard",
     next_step: "draft_proposal",
     reasoning_summary: "Strong technical match.",
+    extracted_fields: null,
     created_at: "2026-03-15T10:00:00Z",
     updated_at: "2026-03-15T10:00:00Z",
     ...overrides,
