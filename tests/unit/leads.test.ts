@@ -13,6 +13,8 @@ import {
   insertReviewDecision,
   getProposalDrafts,
   selectProposalType,
+  markProposalSubmitted,
+  getMetrics,
 } from "@/lib/leads";
 
 beforeEach(() => {
@@ -257,5 +259,80 @@ describe("selectProposalType", () => {
       ["standard", "uuid-1"],
     );
     expect(mockQuery.mock.calls[0][0]).toContain("draft_status = 'selected'");
+  });
+});
+
+describe("markProposalSubmitted", () => {
+  it("updates draft status and lead status", async () => {
+    mockQuery.mockResolvedValue({ rows: [] });
+
+    await markProposalSubmitted("uuid-1", "lead_abc");
+
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+    // First call: update proposal_drafts
+    expect(mockQuery.mock.calls[0][0]).toContain("proposal_drafts");
+    expect(mockQuery.mock.calls[0][0]).toContain("submitted_manually");
+    expect(mockQuery.mock.calls[0][1]).toEqual(["uuid-1"]);
+    // Second call: update leads
+    expect(mockQuery.mock.calls[1][0]).toContain("leads");
+    expect(mockQuery.mock.calls[1][0]).toContain("applied_manually");
+    expect(mockQuery.mock.calls[1][1]).toEqual(["lead_abc"]);
+  });
+});
+
+describe("getMetrics", () => {
+  it("runs 7 parallel queries and returns structured metrics", async () => {
+    const statusRows = { rows: [{ name: "scored", value: 50 }] };
+    const scoreStats = { rows: [{ avg: 68, min: 40, max: 92, total: 88 }] };
+    const verdictRows = { rows: [{ name: "maybe", value: 30 }] };
+    const platformRows = { rows: [{ name: "upwork", value: 70 }] };
+    const profileRows = {
+      rows: [{ name: "flagship", value: 40, avg_score: 72 }],
+    };
+    const dailyRows = { rows: [{ date: "2026-04-01", count: 12 }] };
+    const scoreDistRows = { rows: [{ range: "60-69", count: 25 }] };
+
+    mockQuery
+      .mockResolvedValueOnce(statusRows)
+      .mockResolvedValueOnce(scoreStats)
+      .mockResolvedValueOnce(verdictRows)
+      .mockResolvedValueOnce(platformRows)
+      .mockResolvedValueOnce(profileRows)
+      .mockResolvedValueOnce(dailyRows)
+      .mockResolvedValueOnce(scoreDistRows);
+
+    const result = await getMetrics();
+
+    expect(mockQuery).toHaveBeenCalledTimes(7);
+    expect(result.statusBreakdown).toEqual([{ name: "scored", value: 50 }]);
+    expect(result.scoreStats).toEqual({
+      avg: 68,
+      min: 40,
+      max: 92,
+      total: 88,
+    });
+    expect(result.verdictBreakdown).toEqual([{ name: "maybe", value: 30 }]);
+    expect(result.platformBreakdown).toEqual([{ name: "upwork", value: 70 }]);
+    expect(result.profileBreakdown).toEqual([
+      { name: "flagship", value: 40, avg_score: 72 },
+    ]);
+    expect(result.dailyIntake).toEqual([{ date: "2026-04-01", count: 12 }]);
+    expect(result.scoreDistribution).toEqual([{ range: "60-69", count: 25 }]);
+  });
+
+  it("returns default scoreStats when no scored leads", async () => {
+    mockQuery
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await getMetrics();
+
+    expect(result.scoreStats).toEqual({ avg: 0, min: 0, max: 0, total: 0 });
+    expect(result.statusBreakdown).toEqual([]);
   });
 });

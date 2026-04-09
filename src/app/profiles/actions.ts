@@ -9,27 +9,12 @@ const ALLOWED_TYPES = [
   "text/plain",
 ];
 
-async function extractPdfText(data: Uint8Array): Promise<string> {
-  // Use pdfjs-dist legacy build directly — no workers needed for Node.js
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.mjs");
-  const doc = await pdfjsLib.getDocument({ data }).promise;
-  const pages: string[] = [];
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item: { str?: string }) => item.str ?? "")
-      .join(" ");
-    pages.push(pageText);
-  }
-  await doc.destroy();
-  return pages.join("\n");
-}
+export type FileResult =
+  | { mode: "text"; text: string }
+  | { mode: "file"; file_base64: string; mime: string }
+  | { error: string };
 
-export async function extractTextFromFile(
-  formData: FormData,
-): Promise<{ text: string } | { error: string }> {
+export async function processFileForCV(formData: FormData): Promise<FileResult> {
   const file = formData.get("file") as File | null;
   if (!file) return { error: "No se recibió archivo" };
 
@@ -38,39 +23,37 @@ export async function extractTextFromFile(
   }
 
   if (!ALLOWED_TYPES.includes(file.type) && !file.name.endsWith(".txt")) {
-    return {
-      error: "Formato no soportado. Usá PDF, DOCX o TXT.",
-    };
+    return { error: "Formato no soportado. Usá PDF, DOCX o TXT." };
   }
 
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
+    // PDF: send as base64 for GPT-4o to read directly
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      const text = (await extractPdfText(new Uint8Array(arrayBuffer))).trim();
-      if (!text)
-        return { error: "No se pudo extraer texto del PDF. ¿Está escaneado?" };
-      return { text };
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      return { mode: "file", file_base64: base64, mime: "application/pdf" };
     }
 
+    // DOCX: extract text with mammoth (works fine in Next.js)
     if (
       file.type ===
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
       file.name.endsWith(".docx")
     ) {
+      const buffer = Buffer.from(arrayBuffer);
       const result = await mammoth.extractRawText({ buffer });
       const text = result.value.trim();
       if (!text) return { error: "No se pudo extraer texto del DOCX" };
-      return { text };
+      return { mode: "text", text };
     }
 
     // Plain text
-    const text = buffer.toString("utf-8").trim();
+    const text = Buffer.from(arrayBuffer).toString("utf-8").trim();
     if (!text) return { error: "El archivo está vacío" };
-    return { text };
+    return { mode: "text", text };
   } catch (e) {
-    console.error("File extraction error:", e);
+    console.error("File processing error:", e);
     return { error: "Error al procesar el archivo" };
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { extractTextFromFile } from "./actions";
+import { processFileForCV } from "./actions";
 
 const AGENT_SERVICE_URL =
   process.env.NEXT_PUBLIC_AGENT_SERVICE_URL || "http://localhost:8000";
@@ -94,6 +94,10 @@ export default function ProfileBuilderPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
+  const [fileData, setFileData] = useState<{
+    file_base64: string;
+    mime: string;
+  } | null>(null);
   const [currentProfile, setCurrentProfile] = useState<Record<
     string,
     unknown
@@ -110,12 +114,17 @@ export default function ProfileBuilderPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const result = await extractTextFromFile(formData);
+      const result = await processFileForCV(formData);
       if ("error" in result) {
         setError(result.error);
         setFileName(null);
-      } else {
+      } else if (result.mode === "text") {
         setCvText(result.text);
+        setFileData(null);
+      } else {
+        // PDF: store base64 to send directly to agent-service
+        setCvText("");
+        setFileData({ file_base64: result.file_base64, mime: result.mime });
       }
     } catch {
       setError("Error al procesar el archivo");
@@ -130,10 +139,14 @@ export default function ProfileBuilderPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await callAgent("/v1/parse-cv", {
-        cv_text: cvText,
-        language,
-      });
+      const body = fileData
+        ? {
+            cv_file: fileData.file_base64,
+            cv_file_mime: fileData.mime,
+            language,
+          }
+        : { cv_text: cvText, language };
+      const data = await callAgent("/v1/parse-cv", body);
       setParsedCV(data);
       setStep(2);
     } catch (e) {
@@ -267,6 +280,15 @@ export default function ProfileBuilderPage() {
                 <span className="text-sm text-blue-600">
                   Procesando archivo...
                 </span>
+              ) : fileName && fileData ? (
+                <div className="text-center">
+                  <span className="text-sm font-medium text-green-700">
+                    ✓ {fileName}
+                  </span>
+                  <p className="mt-1 text-xs text-gray-500">
+                    El PDF se enviará directo al modelo AI para análisis.
+                  </p>
+                </div>
               ) : fileName ? (
                 <div className="text-center">
                   <span className="text-sm font-medium text-green-700">
@@ -335,13 +357,15 @@ export default function ProfileBuilderPage() {
             </select>
             <button
               onClick={handleParseCV}
-              disabled={loading || cvText.length < 50}
+              disabled={loading || (!fileData && cvText.length < 50)}
               className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? "Analizando..." : "Analizar CV"}
             </button>
             <span className="text-xs text-gray-400">
-              Mínimo 50 caracteres ({cvText.length})
+              {fileData
+                ? "PDF listo para enviar"
+                : `Mínimo 50 caracteres (${cvText.length})`}
             </span>
           </div>
         </div>
@@ -716,6 +740,8 @@ export default function ProfileBuilderPage() {
               onClick={() => {
                 setParsedCV(null);
                 setProfiles(null);
+                setFileData(null);
+                setFileName(null);
                 setStep(1);
               }}
               className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
