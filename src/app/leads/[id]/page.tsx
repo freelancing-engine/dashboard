@@ -178,6 +178,31 @@ export default async function LeadDetailPage({
             </dl>
           </div>
 
+          {/* Source attribution */}
+          <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <h2 className="mb-2 font-semibold">Origen</h2>
+            <dl className="grid grid-cols-2 gap-2 text-sm">
+              <dt className="text-gray-500">Plataforma</dt>
+              <dd className="capitalize">{lead.platform}</dd>
+              <dt className="text-gray-500">Tipo fuente</dt>
+              <dd>{lead.source_type?.replace(/_/g, " ") || "—"}</dd>
+              {lead.source_notes && (
+                <>
+                  <dt className="text-gray-500">Notas fuente</dt>
+                  <dd>{lead.source_notes}</dd>
+                </>
+              )}
+              <dt className="text-gray-500">Recibido</dt>
+              <dd>
+                {lead.received_at
+                  ? new Date(lead.received_at).toLocaleDateString("es-AR")
+                  : lead.created_at
+                    ? new Date(lead.created_at).toLocaleDateString("es-AR")
+                    : "—"}
+              </dd>
+            </dl>
+          </div>
+
           {/* Application suggestion */}
           <ApplicationSuggestion lead={lead} />
 

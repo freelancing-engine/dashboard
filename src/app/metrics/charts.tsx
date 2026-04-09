@@ -292,3 +292,59 @@ export function ScoreDistributionChart({
     </ResponsiveContainer>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Source type breakdown (pie) — lead attribution
+// ---------------------------------------------------------------------------
+
+const SOURCE_TYPE_LABELS: Record<string, string> = {
+  email_alert: "Email alert",
+  manual_link: "Manual (link)",
+  manual_text: "Manual (texto)",
+  saved_search_export: "Búsqueda guardada",
+  notification: "Notificación",
+  referral: "Referido",
+  other: "Otro",
+};
+
+const SOURCE_TYPE_COLORS: Record<string, string> = {
+  email_alert: "#f59e0b",
+  manual_link: "#3b82f6",
+  manual_text: "#8b5cf6",
+  saved_search_export: "#06b6d4",
+  notification: "#22c55e",
+  referral: "#ec4899",
+  other: "#9ca3af",
+};
+
+export function SourceTypeChart({ data }: { data: NameValue[] }) {
+  const mapped = data.map((d) => ({
+    ...d,
+    label: SOURCE_TYPE_LABELS[d.name] || d.name,
+    fill: SOURCE_TYPE_COLORS[d.name] || PIE_COLORS[0],
+  }));
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={mapped}
+          dataKey="value"
+          nameKey="label"
+          cx="50%"
+          cy="50%"
+          outerRadius={100}
+          label={(props: PieLabelRenderProps) => {
+            const d = props.payload as Record<string, unknown>;
+            return `${d.label ?? d.name}: ${props.value}`;
+          }}
+        >
+          {mapped.map((entry, i) => (
+            <Cell key={i} fill={entry.fill} />
+          ))}
+        </Pie>
+        <Tooltip />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}

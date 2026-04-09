@@ -29,6 +29,7 @@ jest.mock("@/app/metrics/charts", () => ({
   ProfileChart: () => <div data-testid="profile-chart" />,
   DailyIntakeChart: () => <div data-testid="daily-chart" />,
   ScoreDistributionChart: () => <div data-testid="score-dist-chart" />,
+  SourceTypeChart: () => <div data-testid="source-type-chart" />,
 }));
 
 function makeMetrics(overrides: Partial<MetricsData> = {}): MetricsData {
@@ -58,6 +59,10 @@ function makeMetrics(overrides: Partial<MetricsData> = {}): MetricsData {
     scoreDistribution: [
       { range: "70-79", count: 15 },
       { range: "50-59", count: 10 },
+    ],
+    sourceTypeBreakdown: [
+      { name: "email_alert", value: 30 },
+      { name: "manual_link", value: 15 },
     ],
     ...overrides,
   };
@@ -141,7 +146,7 @@ describe("MetricsPage", () => {
 
   // ── Chart sections ────────────────────────────────────────────────
 
-  it("renders all 6 chart sections", async () => {
+  it("renders all 7 chart sections", async () => {
     await renderPage();
     expect(screen.getByText("Pipeline de leads")).toBeInTheDocument();
     expect(screen.getByText("Distribución de puntajes")).toBeInTheDocument();
@@ -149,6 +154,7 @@ describe("MetricsPage", () => {
     expect(screen.getByText("Plataformas")).toBeInTheDocument();
     expect(screen.getByText("Ángulos de perfil")).toBeInTheDocument();
     expect(screen.getByText("Leads por día")).toBeInTheDocument();
+    expect(screen.getByText("Origen de leads")).toBeInTheDocument();
 
     expect(screen.getByTestId("status-chart")).toBeInTheDocument();
     expect(screen.getByTestId("verdict-chart")).toBeInTheDocument();
@@ -156,5 +162,6 @@ describe("MetricsPage", () => {
     expect(screen.getByTestId("profile-chart")).toBeInTheDocument();
     expect(screen.getByTestId("daily-chart")).toBeInTheDocument();
     expect(screen.getByTestId("score-dist-chart")).toBeInTheDocument();
+    expect(screen.getByTestId("source-type-chart")).toBeInTheDocument();
   });
 });

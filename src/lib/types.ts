@@ -41,10 +41,20 @@ export type ReviewDecision =
   | "re_score"
   | "reject";
 
+export type SourceType =
+  | "email_alert"
+  | "manual_link"
+  | "manual_text"
+  | "saved_search_export"
+  | "notification"
+  | "referral"
+  | "other";
+
 export interface Lead {
   lead_id: string;
   platform: Platform;
-  source_type: string;
+  source_type: SourceType;
+  source_notes: string | null;
   title: string;
   raw_description: string;
   normalized_description: string | null;
@@ -100,6 +110,7 @@ export interface ExtractedFields {
 export interface LeadListItem {
   lead_id: string;
   platform: Platform;
+  source_type: SourceType;
   title: string;
   client_country: string | null;
   budget_value: string | null;
@@ -182,4 +193,5 @@ export interface MetricsData {
   profileBreakdown: ProfileBreakdownItem[];
   dailyIntake: DailyIntakeItem[];
   scoreDistribution: ScoreDistribution[];
+  sourceTypeBreakdown: NameValue[];
 }

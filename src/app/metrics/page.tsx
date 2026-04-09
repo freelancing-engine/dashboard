@@ -7,6 +7,7 @@ import {
   ProfileChart,
   DailyIntakeChart,
   ScoreDistributionChart,
+  SourceTypeChart,
 } from "./charts";
 
 export const dynamic = "force-dynamic";
@@ -103,6 +104,14 @@ export default async function MetricsPage() {
             Leads por día
           </h2>
           <DailyIntakeChart data={metrics.dailyIntake} />
+        </div>
+
+        {/* Source type attribution */}
+        <div className="rounded-lg border bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-gray-700">
+            Origen de leads
+          </h2>
+          <SourceTypeChart data={metrics.sourceTypeBreakdown} />
         </div>
       </div>
     </main>

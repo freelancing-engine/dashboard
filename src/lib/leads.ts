@@ -47,7 +47,7 @@ export async function getLeads(filters?: {
   const total = parseInt(countResult.rows[0].count);
 
   const query = `
-    SELECT lead_id, platform::text, title, client_country, budget_value,
+    SELECT lead_id, platform::text, source_type::text, title, client_country, budget_value,
            score_total, verdict::text, best_profile_angle::text,
            lead_status::text, review_priority::text,
            posted_at, created_at
@@ -78,7 +78,7 @@ export async function getLeadById(leadId: string): Promise<Lead | null> {
             score_total, verdict::text, red_flags,
             best_profile_angle::text, best_proposal_type::text,
             next_step, reasoning_summary,
-            extracted_fields,
+            extracted_fields, source_notes,
             created_at, updated_at
      FROM leads WHERE lead_id = $1`,
     [leadId],
@@ -221,6 +221,7 @@ export async function getMetrics(): Promise<MetricsData> {
     profileRows,
     dailyRows,
     scoreDistRows,
+    sourceTypeRows,
   ] = await Promise.all([
     pool.query(
       `SELECT lead_status::text as name, COUNT(*)::int as value
@@ -267,6 +268,10 @@ export async function getMetrics(): Promise<MetricsData> {
        GROUP BY range
        ORDER BY range`,
     ),
+    pool.query(
+      `SELECT source_type::text as name, COUNT(*)::int as value
+       FROM leads GROUP BY source_type ORDER BY value DESC`,
+    ),
   ]);
 
   return {
@@ -277,5 +282,6 @@ export async function getMetrics(): Promise<MetricsData> {
     profileBreakdown: profileRows.rows,
     dailyIntake: dailyRows.rows,
     scoreDistribution: scoreDistRows.rows,
+    sourceTypeBreakdown: sourceTypeRows.rows,
   };
 }

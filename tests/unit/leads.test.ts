@@ -281,7 +281,7 @@ describe("markProposalSubmitted", () => {
 });
 
 describe("getMetrics", () => {
-  it("runs 7 parallel queries and returns structured metrics", async () => {
+  it("runs 8 parallel queries and returns structured metrics", async () => {
     const statusRows = { rows: [{ name: "scored", value: 50 }] };
     const scoreStats = { rows: [{ avg: 68, min: 40, max: 92, total: 88 }] };
     const verdictRows = { rows: [{ name: "maybe", value: 30 }] };
@@ -291,6 +291,7 @@ describe("getMetrics", () => {
     };
     const dailyRows = { rows: [{ date: "2026-04-01", count: 12 }] };
     const scoreDistRows = { rows: [{ range: "60-69", count: 25 }] };
+    const sourceTypeRows = { rows: [{ name: "email_alert", value: 30 }] };
 
     mockQuery
       .mockResolvedValueOnce(statusRows)
@@ -299,11 +300,12 @@ describe("getMetrics", () => {
       .mockResolvedValueOnce(platformRows)
       .mockResolvedValueOnce(profileRows)
       .mockResolvedValueOnce(dailyRows)
-      .mockResolvedValueOnce(scoreDistRows);
+      .mockResolvedValueOnce(scoreDistRows)
+      .mockResolvedValueOnce(sourceTypeRows);
 
     const result = await getMetrics();
 
-    expect(mockQuery).toHaveBeenCalledTimes(7);
+    expect(mockQuery).toHaveBeenCalledTimes(8);
     expect(result.statusBreakdown).toEqual([{ name: "scored", value: 50 }]);
     expect(result.scoreStats).toEqual({
       avg: 68,
@@ -318,10 +320,14 @@ describe("getMetrics", () => {
     ]);
     expect(result.dailyIntake).toEqual([{ date: "2026-04-01", count: 12 }]);
     expect(result.scoreDistribution).toEqual([{ range: "60-69", count: 25 }]);
+    expect(result.sourceTypeBreakdown).toEqual([
+      { name: "email_alert", value: 30 },
+    ]);
   });
 
   it("returns default scoreStats when no scored leads", async () => {
     mockQuery
+      .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [] })
@@ -334,5 +340,6 @@ describe("getMetrics", () => {
 
     expect(result.scoreStats).toEqual({ avg: 0, min: 0, max: 0, total: 0 });
     expect(result.statusBreakdown).toEqual([]);
+    expect(result.sourceTypeBreakdown).toEqual([]);
   });
 });

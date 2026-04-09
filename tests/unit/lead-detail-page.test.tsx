@@ -64,6 +64,7 @@ function makeLead(overrides: Partial<Lead> = {}): Lead {
     lead_id: "lead_42",
     platform: "upwork",
     source_type: "manual_link",
+    source_notes: "Found via Upwork saved search",
     title: "Build a chat system",
     raw_description: "Full-stack chat with real-time messaging",
     normalized_description: null,
@@ -131,7 +132,8 @@ describe("LeadDetailPage", () => {
 
   it("shows platform, country, budget", async () => {
     await renderPage();
-    expect(screen.getByText("upwork")).toBeInTheDocument();
+    // Platform appears in header and attribution section
+    expect(screen.getAllByText("upwork").length).toBeGreaterThanOrEqual(1);
     // Country appears in header metadata and client info section
     expect(screen.getAllByText(/United States/).length).toBeGreaterThanOrEqual(
       1,
@@ -252,5 +254,27 @@ describe("LeadDetailPage", () => {
     // Should render "—" for each null field
     const dashes = screen.getAllByText("—");
     expect(dashes.length).toBeGreaterThanOrEqual(5);
+  });
+
+  // ── Attribution section ─────────────────────────────────────────
+
+  it("renders source attribution section", async () => {
+    await renderPage();
+    expect(screen.getByText("Origen")).toBeInTheDocument();
+    expect(screen.getByText("manual link")).toBeInTheDocument();
+  });
+
+  it("shows source_notes when present", async () => {
+    await renderPage();
+    expect(
+      screen.getByText("Found via Upwork saved search"),
+    ).toBeInTheDocument();
+  });
+
+  it("hides source_notes row when null", async () => {
+    mockGetLeadById.mockResolvedValue(makeLead({ source_notes: null }));
+    await renderPage();
+    expect(screen.getByText("Origen")).toBeInTheDocument();
+    expect(screen.queryByText("Notas fuente")).not.toBeInTheDocument();
   });
 });

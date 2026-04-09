@@ -7,6 +7,7 @@ import {
   ProfileChart,
   DailyIntakeChart,
   ScoreDistributionChart,
+  SourceTypeChart,
 } from "@/app/metrics/charts";
 
 // Mock recharts — SVG rendering doesn't work in jsdom.
@@ -149,5 +150,23 @@ describe("ScoreDistributionChart", () => {
   it("fills missing ranges with zero count", () => {
     render(<ScoreDistributionChart data={[]} />);
     expect(screen.getByTestId("bar-chart")).toHaveAttribute("data-len", "6");
+  });
+});
+
+describe("SourceTypeChart", () => {
+  it("renders a pie chart with source type data", () => {
+    const data = [
+      { name: "email_alert", value: 30 },
+      { name: "manual_link", value: 15 },
+      { name: "saved_search_export", value: 40 },
+    ];
+    render(<SourceTypeChart data={data} />);
+    expect(screen.getByTestId("pie-chart")).toBeInTheDocument();
+    expect(screen.getByTestId("pie")).toHaveAttribute("data-len", "3");
+  });
+
+  it("renders with empty data", () => {
+    render(<SourceTypeChart data={[]} />);
+    expect(screen.getByTestId("pie")).toHaveAttribute("data-len", "0");
   });
 });
