@@ -127,6 +127,8 @@ CREATE TABLE IF NOT EXISTS leads (
     reasoning_summary TEXT,
     scoring_notes TEXT,
 
+    extracted_fields JSONB,
+
     last_error TEXT,
     last_error_at TIMESTAMPTZ,
     retry_count INTEGER NOT NULL DEFAULT 0,
