@@ -79,13 +79,18 @@ function makeDraft(overrides: Partial<ProposalDraft> = {}): ProposalDraft {
 
 describe("ProposalPreview", () => {
   it("returns null for empty drafts", () => {
-    const { container } = render(<ProposalPreview lead={makeLead()} drafts={[]} />);
+    const { container } = render(
+      <ProposalPreview lead={makeLead()} drafts={[]} />,
+    );
     expect(container.innerHTML).toBe("");
   });
 
   it("returns null when no active draft", () => {
     const { container } = render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ is_active: false })]} />,
+      <ProposalPreview
+        lead={makeLead()}
+        drafts={[makeDraft({ is_active: false })]}
+      />,
     );
     expect(container.innerHTML).toBe("");
   });
@@ -99,7 +104,10 @@ describe("ProposalPreview", () => {
 
   it("renders selected status badge", () => {
     render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ draft_status: "selected" })]} />,
+      <ProposalPreview
+        lead={makeLead()}
+        drafts={[makeDraft({ draft_status: "selected" })]}
+      />,
     );
 
     expect(screen.getByText("Seleccionada")).toBeInTheDocument();
@@ -134,7 +142,9 @@ describe("ProposalPreview", () => {
   });
 
   it("shows recommended tab with star", () => {
-    const { container } = render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
+    const { container } = render(
+      <ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />,
+    );
 
     expect(container.querySelector(".text-green-600")).not.toBeNull();
     expect(screen.getByText("★")).toBeInTheDocument();
@@ -176,7 +186,10 @@ describe("ProposalPreview", () => {
 
   it("does not render questions section when empty", () => {
     render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ optional_questions: [] })]} />,
+      <ProposalPreview
+        lead={makeLead()}
+        drafts={[makeDraft({ optional_questions: [] })]}
+      />,
     );
 
     expect(
@@ -222,7 +235,10 @@ describe("ProposalPreview", () => {
 
   it("hides select button for selected status", () => {
     render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ draft_status: "selected" })]} />,
+      <ProposalPreview
+        lead={makeLead()}
+        drafts={[makeDraft({ draft_status: "selected" })]}
+      />,
     );
 
     expect(
@@ -232,7 +248,10 @@ describe("ProposalPreview", () => {
 
   it("only renders tabs for present versions", () => {
     render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft({ consultative_version: null })]} />,
+      <ProposalPreview
+        lead={makeLead()}
+        drafts={[makeDraft({ consultative_version: null })]}
+      />,
     );
 
     expect(screen.getByText("Corta")).toBeInTheDocument();
@@ -242,7 +261,11 @@ describe("ProposalPreview", () => {
   it("shows connect cost estimate for Upwork leads", () => {
     render(
       <ProposalPreview
-        lead={makeLead({ platform: "upwork", budget_type: "fixed", budget_value: "500" })}
+        lead={makeLead({
+          platform: "upwork",
+          budget_type: "fixed",
+          budget_value: "500",
+        })}
         drafts={[makeDraft()]}
       />,
     );
@@ -262,17 +285,13 @@ describe("ProposalPreview", () => {
   });
 
   it("shows copy button", () => {
-    render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />,
-    );
+    render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(screen.getByRole("button", { name: "Copiar" })).toBeInTheDocument();
   });
 
   it("shows submit button for generated drafts", () => {
-    render(
-      <ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />,
-    );
+    render(<ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />);
 
     expect(
       screen.getByRole("button", { name: "Marcar como enviada" }),
@@ -292,10 +311,7 @@ describe("ProposalPreview", () => {
 
   it("hides Upwork link when lead has no URL", () => {
     render(
-      <ProposalPreview
-        lead={makeLead({ url: null })}
-        drafts={[makeDraft()]}
-      />,
+      <ProposalPreview lead={makeLead({ url: null })} drafts={[makeDraft()]} />,
     );
 
     expect(screen.queryByText("Ir a Upwork ↗")).not.toBeInTheDocument();
