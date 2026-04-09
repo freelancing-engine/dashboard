@@ -137,6 +137,17 @@ export interface ProposalDraft {
   updated_at: string;
 }
 
+export interface OutcomeLogEntry {
+  action_id: string;
+  lead_id: string;
+  action_type: string;
+  actor_type: string;
+  payload: Record<string, unknown> | null;
+  action_status: string;
+  workflow_name: string | null;
+  created_at: string;
+}
+
 export interface StatusCount {
   lead_status: LeadStatus;
   count: number;

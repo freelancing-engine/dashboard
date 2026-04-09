@@ -2,6 +2,7 @@ import pool from "./db";
 import type {
   Lead,
   LeadListItem,
+  OutcomeLogEntry,
   ProposalDraft,
   StatusCount,
   MetricsData,
@@ -181,6 +182,30 @@ export async function markProposalSubmitted(
      WHERE lead_id = $1`,
     [leadId],
   );
+}
+
+// ---------------------------------------------------------------------------
+// Outcome history
+// ---------------------------------------------------------------------------
+
+export async function getOutcomeHistory(
+  leadId: string,
+): Promise<OutcomeLogEntry[]> {
+  const result = await pool.query(
+    `SELECT action_id, lead_id, action_type, actor_type::text,
+            payload, action_status::text, workflow_name, created_at
+     FROM action_logs
+     WHERE lead_id = $1
+       AND action_type IN (
+         'outcome_logged', 'review_decision', 'lead_scored',
+         'proposal_generated', 'auto_draft_triggered',
+         'proposal_submitted', 'lead_ingested'
+       )
+     ORDER BY created_at DESC
+     LIMIT 50`,
+    [leadId],
+  );
+  return result.rows as OutcomeLogEntry[];
 }
 
 // ---------------------------------------------------------------------------

@@ -21,6 +21,7 @@ import {
   selectProposal,
   generateProposal,
   markProposalSubmitted,
+  logOutcome,
 } from "@/app/actions";
 
 beforeEach(() => {
@@ -294,5 +295,153 @@ describe("markProposalSubmitted", () => {
     await markProposalSubmitted(makeFormData({ proposalId: "uuid-1" }));
 
     expect(mockMarkProposalSubmitted).not.toHaveBeenCalled();
+  });
+});
+
+// ── logOutcome ──────────────────────────────────────────────────────────
+
+describe("logOutcome", () => {
+  it("replied → calls WF07 webhook", async () => {
+    await logOutcome(
+      makeFormData({
+        leadId: "lead_1",
+        outcome: "replied",
+        notes: "Client responded",
+      }),
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/log-outcome"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          lead_id: "lead_1",
+          outcome: "replied",
+          notes: "Client responded",
+          reporter: "dashboard",
+        }),
+      }),
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/leads/lead_1");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("won → calls WF07 webhook with won outcome", async () => {
+    await logOutcome(
+      makeFormData({ leadId: "lead_2", outcome: "won", notes: "" }),
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/log-outcome"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_2",
+          outcome: "won",
+          notes: null,
+          reporter: "dashboard",
+        }),
+      }),
+    );
+  });
+
+  it("lost → calls WF07 webhook with lost outcome", async () => {
+    await logOutcome(
+      makeFormData({ leadId: "lead_3", outcome: "lost", notes: "No budget" }),
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/log-outcome"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_3",
+          outcome: "lost",
+          notes: "No budget",
+          reporter: "dashboard",
+        }),
+      }),
+    );
+  });
+
+  it("interview → calls WF07 webhook", async () => {
+    await logOutcome(
+      makeFormData({ leadId: "lead_4", outcome: "interview", notes: "" }),
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/log-outcome"),
+      expect.objectContaining({
+        body: JSON.stringify({
+          lead_id: "lead_4",
+          outcome: "interview",
+          notes: null,
+          reporter: "dashboard",
+        }),
+      }),
+    );
+  });
+
+  it("returns error for missing leadId", async () => {
+    const result = await logOutcome(
+      makeFormData({ outcome: "won", notes: "" }),
+    );
+    expect(result).toEqual({ error: "Lead ID y outcome requeridos" });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("returns error for missing outcome", async () => {
+    const result = await logOutcome(
+      makeFormData({ leadId: "lead_1", notes: "" }),
+    );
+    expect(result).toEqual({ error: "Lead ID y outcome requeridos" });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("returns error for invalid outcome", async () => {
+    const result = await logOutcome(
+      makeFormData({
+        leadId: "lead_1",
+        outcome: "invalid_outcome",
+        notes: "",
+      }),
+    );
+    expect(result).toEqual({ error: "Outcome inválido" });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("returns error on WF07 failure", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: async () => "Internal error",
+    });
+
+    const result = await logOutcome(
+      makeFormData({ leadId: "lead_1", outcome: "won", notes: "" }),
+    );
+    expect(result).toEqual({
+      error: "Error registrando outcome (500)",
+    });
+  });
+
+  it("returns error on network failure", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    const result = await logOutcome(
+      makeFormData({ leadId: "lead_1", outcome: "won", notes: "" }),
+    );
+    expect(result).toEqual({
+      error: "Error registrando outcome: Network error",
+    });
+  });
+
+  it("sends null notes when empty string", async () => {
+    await logOutcome(
+      makeFormData({ leadId: "lead_1", outcome: "replied", notes: "" }),
+    );
+
+    const body = JSON.parse(
+      (mockFetch.mock.calls[0][1] as { body: string }).body,
+    );
+    expect(body.notes).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import type { Lead, ProposalDraft } from "@/lib/types";
+import type { Lead, ProposalDraft, OutcomeLogEntry } from "@/lib/types";
 
 // Mock next/navigation
 const mockNotFound = jest.fn();
@@ -27,9 +27,11 @@ jest.mock("next/link", () => {
 // Mock data functions
 const mockGetLeadById = jest.fn<Promise<Lead | null>, [string]>();
 const mockGetProposalDrafts = jest.fn<Promise<ProposalDraft[]>, [string]>();
+const mockGetOutcomeHistory = jest.fn<Promise<OutcomeLogEntry[]>, [string]>();
 jest.mock("@/lib/leads", () => ({
   getLeadById: (id: string) => mockGetLeadById(id),
   getProposalDrafts: (id: string) => mockGetProposalDrafts(id),
+  getOutcomeHistory: (id: string) => mockGetOutcomeHistory(id),
 }));
 
 // Mock child components
@@ -47,6 +49,12 @@ jest.mock("@/app/leads/[id]/generate-proposal-button", () => ({
 }));
 jest.mock("@/app/leads/[id]/extracted-fields", () => ({
   ExtractedFieldsCard: () => <div data-testid="extracted-fields" />,
+}));
+jest.mock("@/app/leads/[id]/outcome-actions", () => ({
+  OutcomeActions: () => <div data-testid="outcome-actions" />,
+}));
+jest.mock("@/app/leads/[id]/outcome-timeline", () => ({
+  OutcomeTimeline: () => <div data-testid="outcome-timeline" />,
 }));
 
 import LeadDetailPage from "@/app/leads/[id]/page";
@@ -100,6 +108,7 @@ describe("LeadDetailPage", () => {
     jest.clearAllMocks();
     mockGetLeadById.mockResolvedValue(makeLead());
     mockGetProposalDrafts.mockResolvedValue([]);
+    mockGetOutcomeHistory.mockResolvedValue([]);
   });
 
   async function renderPage(id = "lead_42") {
@@ -199,6 +208,8 @@ describe("LeadDetailPage", () => {
     expect(screen.getByTestId("app-suggestion")).toBeInTheDocument();
     expect(screen.getByTestId("proposal-preview")).toBeInTheDocument();
     expect(screen.getByTestId("generate-btn")).toBeInTheDocument();
+    expect(screen.getByTestId("outcome-actions")).toBeInTheDocument();
+    expect(screen.getByTestId("outcome-timeline")).toBeInTheDocument();
   });
 
   it("renders extracted fields when present", async () => {

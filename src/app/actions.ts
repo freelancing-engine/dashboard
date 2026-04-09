@@ -115,3 +115,50 @@ export async function markProposalSubmitted(formData: FormData) {
   revalidatePath(`/leads/${leadId}`);
   revalidatePath("/");
 }
+
+const VALID_OUTCOMES = [
+  "applied_manually",
+  "replied",
+  "interview",
+  "won",
+  "lost",
+  "archived",
+] as const;
+
+export async function logOutcome(formData: FormData) {
+  const leadId = formData.get("leadId") as string;
+  const outcome = formData.get("outcome") as string;
+  const notes = formData.get("notes") as string;
+
+  if (!leadId || !outcome) return { error: "Lead ID y outcome requeridos" };
+  if (!VALID_OUTCOMES.includes(outcome as (typeof VALID_OUTCOMES)[number])) {
+    return { error: "Outcome inválido" };
+  }
+
+  try {
+    const resp = await fetch(`${N8N_WEBHOOK_URL}/log-outcome`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lead_id: leadId,
+        outcome,
+        notes: notes || null,
+        reporter: "dashboard",
+      }),
+    });
+
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      console.error(`WF07 error: ${resp.status} — ${errBody}`);
+      return { error: `Error registrando outcome (${resp.status})` };
+    }
+
+    revalidatePath(`/leads/${leadId}`);
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    return {
+      error: `Error registrando outcome: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}

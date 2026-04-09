@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getLeadById, getProposalDrafts } from "@/lib/leads";
+import { getLeadById, getProposalDrafts, getOutcomeHistory } from "@/lib/leads";
 import { STATUS_LABELS, STATUS_COLORS } from "../../components/stats-bar";
 import { ReviewActions } from "./review-actions";
 import { ApplicationSuggestion } from "./application-suggestion";
 import { ProposalPreview } from "./proposal-preview";
 import { GenerateProposalButton } from "./generate-proposal-button";
 import { ExtractedFieldsCard } from "./extracted-fields";
+import { OutcomeActions } from "./outcome-actions";
+import { OutcomeTimeline } from "./outcome-timeline";
 
 const SCORE_DIMENSIONS = [
   { key: "score_technical_fit", label: "Technical Fit", max: 20 },
@@ -32,9 +34,10 @@ export default async function LeadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [lead, drafts] = await Promise.all([
+  const [lead, drafts, outcomeHistory] = await Promise.all([
     getLeadById(id),
     getProposalDrafts(id),
+    getOutcomeHistory(id),
   ]);
   if (!lead) notFound();
 
@@ -193,6 +196,15 @@ export default async function LeadDetailPage({
             leadId={lead.lead_id}
             currentStatus={lead.lead_status}
           />
+
+          {/* Outcome tracking */}
+          <OutcomeActions
+            leadId={lead.lead_id}
+            currentStatus={lead.lead_status}
+          />
+
+          {/* Action history timeline */}
+          <OutcomeTimeline entries={outcomeHistory} />
         </div>
       </div>
     </main>
