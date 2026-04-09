@@ -2,6 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { selectProposalType, markProposalSubmitted as dbMarkSubmitted } from "@/lib/leads";
+import { getLogger } from "@/lib/logger";
+
+const log = getLogger("actions");
 
 const N8N_WEBHOOK_URL =
   process.env.N8N_WEBHOOK_URL || "http://n8n:5678/webhook";
@@ -49,7 +52,7 @@ export async function reviewLead(formData: FormData) {
 
   if (!resp.ok) {
     const errBody = await resp.text();
-    console.error(`WF05 error: ${resp.status} — ${errBody}`);
+    log.error("WF05 review-decision failed", { lead_id: leadId, decision, status: resp.status, body: errBody });
   }
 
   revalidatePath(`/leads/${leadId}`);
@@ -149,7 +152,7 @@ export async function logOutcome(formData: FormData) {
 
     if (!resp.ok) {
       const errBody = await resp.text();
-      console.error(`WF07 error: ${resp.status} — ${errBody}`);
+      log.error("WF07 log-outcome failed", { lead_id: leadId, outcome, status: resp.status, body: errBody });
       return { error: `Error registrando outcome (${resp.status})` };
     }
 
