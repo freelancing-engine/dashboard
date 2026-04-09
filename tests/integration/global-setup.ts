@@ -14,8 +14,14 @@ function findSchemaPath(): string {
   const candidates = [
     process.env.SCHEMA_PATH,
     path.resolve(__dirname, "schema.sql"),
-    path.resolve(__dirname, "../../../../docs/freelancing-engine/09-postgres-schema.sql"),
-    path.resolve(__dirname, "../../../docs/freelancing-engine/09-postgres-schema.sql"),
+    path.resolve(
+      __dirname,
+      "../../../../docs/freelancing-engine/09-postgres-schema.sql",
+    ),
+    path.resolve(
+      __dirname,
+      "../../../docs/freelancing-engine/09-postgres-schema.sql",
+    ),
   ].filter(Boolean) as string[];
 
   for (const candidate of candidates) {

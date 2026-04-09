@@ -14,7 +14,12 @@ module.exports = {
   },
   modulePathIgnorePatterns: ["<rootDir>/.next/"],
   setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/.next/", "/tests/e2e/", "/tests/integration/"],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/.next/",
+    "/tests/e2e/",
+    "/tests/integration/",
+  ],
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
     "!src/**/*.d.ts",

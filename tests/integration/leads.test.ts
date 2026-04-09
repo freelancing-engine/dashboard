@@ -70,7 +70,8 @@ const LEAD_2 = {
   platform: "workana",
   source_type: "email_alert",
   title: "Automatización con IA",
-  raw_description: "Necesitamos automatizar procesos con inteligencia artificial.",
+  raw_description:
+    "Necesitamos automatizar procesos con inteligencia artificial.",
   client_country: "Argentina",
   budget_value: "$2000",
   score_technical_fit: 14,
@@ -155,7 +156,10 @@ async function insertLead(lead: Record<string, unknown>) {
   );
 }
 
-async function insertProposal(leadId: string, overrides: Record<string, unknown> = {}) {
+async function insertProposal(
+  leadId: string,
+  overrides: Record<string, unknown> = {},
+) {
   const defaults: Record<string, unknown> = {
     profile_angle_used: "flagship",
     recommended_proposal_type: "standard",
@@ -375,9 +379,7 @@ describe("getStatusCounts", () => {
     const counts = await getStatusCounts();
     expect(counts).toHaveLength(3);
 
-    const map = Object.fromEntries(
-      counts.map((c) => [c.lead_status, c.count]),
-    );
+    const map = Object.fromEntries(counts.map((c) => [c.lead_status, c.count]));
     expect(map.needs_review).toBe(1);
     expect(map.scored).toBe(1);
     expect(map.low_priority).toBe(1);
@@ -553,10 +555,7 @@ describe("getMetrics", () => {
     // dailyIntake — all inserted on same day
     expect(metrics.dailyIntake).toBeDefined();
     expect(metrics.dailyIntake.length).toBeGreaterThan(0);
-    const totalDaily = metrics.dailyIntake.reduce(
-      (sum, d) => sum + d.count,
-      0,
-    );
+    const totalDaily = metrics.dailyIntake.reduce((sum, d) => sum + d.count, 0);
     expect(totalDaily).toBe(3);
 
     // scoreDistribution
