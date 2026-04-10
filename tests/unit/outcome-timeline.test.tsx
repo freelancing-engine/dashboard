@@ -43,11 +43,7 @@ describe("OutcomeTimeline", () => {
   });
 
   it("shows actor type", () => {
-    render(
-      <OutcomeTimeline
-        entries={[makeEntry({ actor_type: "human" })]}
-      />,
-    );
+    render(<OutcomeTimeline entries={[makeEntry({ actor_type: "human" })]} />);
     expect(screen.getByText("por human")).toBeInTheDocument();
   });
 

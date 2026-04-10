@@ -175,7 +175,9 @@ export function PlatformChart({ data }: { data: NameValue[] }) {
           cx="50%"
           cy="50%"
           outerRadius={100}
-          label={(props: PieLabelRenderProps) => `${props.name}: ${props.value}`}
+          label={(props: PieLabelRenderProps) =>
+            `${props.name}: ${props.value}`
+          }
         >
           {data.map((_, i) => (
             <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -259,7 +261,14 @@ export function DailyIntakeChart({ data }: { data: DailyIntakeItem[] }) {
 // Score distribution (histogram)
 // ---------------------------------------------------------------------------
 
-const SCORE_RANGE_ORDER = ["0-39", "40-49", "50-59", "60-69", "70-79", "80-100"];
+const SCORE_RANGE_ORDER = [
+  "0-39",
+  "40-49",
+  "50-59",
+  "60-69",
+  "70-79",
+  "80-100",
+];
 
 export function ScoreDistributionChart({
   data,

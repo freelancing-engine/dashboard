@@ -96,9 +96,7 @@ export function OutcomeTimeline({ entries }: { entries: OutcomeLogEntry[] }) {
                     {formatDate(entry.created_at)}
                   </span>
                 </div>
-                {summary && (
-                  <p className="mt-0.5 text-gray-600">{summary}</p>
-                )}
+                {summary && <p className="mt-0.5 text-gray-600">{summary}</p>}
                 {entry.actor_type && (
                   <span className="text-xs text-gray-400">
                     por {entry.actor_type}

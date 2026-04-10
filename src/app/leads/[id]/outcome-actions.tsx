@@ -75,7 +75,10 @@ export function OutcomeActions({
   const available = OUTCOMES.filter(({ value }) => {
     // Can't go backwards in the funnel
     if (currentStatus === "replied" && value === "replied") return false;
-    if (currentStatus === "interview" && ["replied", "interview"].includes(value))
+    if (
+      currentStatus === "interview" &&
+      ["replied", "interview"].includes(value)
+    )
       return false;
     return true;
   });
@@ -86,9 +89,7 @@ export function OutcomeActions({
       <p className="mb-3 text-sm text-gray-500">
         Registrá el resultado de esta propuesta para hacer seguimiento.
       </p>
-      {error && (
-        <p className="mb-3 text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
       <form action={formAction}>
         <input type="hidden" name="leadId" value={leadId} />
         <div className="mb-3">

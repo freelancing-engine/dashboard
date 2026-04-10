@@ -56,9 +56,7 @@ describe("OutcomeActions", () => {
   // ── Buttons for applied_manually ──────────────────────────────────
 
   it("renders all outcome buttons for applied_manually", () => {
-    render(
-      <OutcomeActions leadId="lead_1" currentStatus="applied_manually" />,
-    );
+    render(<OutcomeActions leadId="lead_1" currentStatus="applied_manually" />);
     expect(screen.getByText("💬 Respondió")).toBeInTheDocument();
     expect(screen.getByText("🎙️ Entrevista")).toBeInTheDocument();
     expect(screen.getByText("🏆 Ganado")).toBeInTheDocument();
@@ -101,9 +99,7 @@ describe("OutcomeActions", () => {
   // ── Notes field ───────────────────────────────────────────────────
 
   it("renders optional notes input", () => {
-    render(
-      <OutcomeActions leadId="lead_1" currentStatus="applied_manually" />,
-    );
+    render(<OutcomeActions leadId="lead_1" currentStatus="applied_manually" />);
     const notesInput = screen.getByLabelText("Notas (opcional)");
     expect(notesInput).toBeInTheDocument();
     expect(notesInput).toHaveAttribute("name", "notes");
@@ -112,9 +108,7 @@ describe("OutcomeActions", () => {
   // ── Button values ─────────────────────────────────────────────────
 
   it("each button has the correct outcome value", () => {
-    render(
-      <OutcomeActions leadId="lead_1" currentStatus="applied_manually" />,
-    );
+    render(<OutcomeActions leadId="lead_1" currentStatus="applied_manually" />);
     expect(screen.getByText("💬 Respondió")).toHaveAttribute(
       "value",
       "replied",
@@ -139,9 +133,7 @@ describe("OutcomeActions", () => {
       mockFormAction,
       true,
     ]);
-    render(
-      <OutcomeActions leadId="lead_1" currentStatus="applied_manually" />,
-    );
+    render(<OutcomeActions leadId="lead_1" currentStatus="applied_manually" />);
 
     const dots = screen.getAllByText("...");
     expect(dots).toHaveLength(5);
@@ -155,9 +147,7 @@ describe("OutcomeActions", () => {
   // ── Tooltip hints ─────────────────────────────────────────────────
 
   it("shows tooltip hint on won button", () => {
-    render(
-      <OutcomeActions leadId="lead_1" currentStatus="applied_manually" />,
-    );
+    render(<OutcomeActions leadId="lead_1" currentStatus="applied_manually" />);
     expect(screen.getByText("🏆 Ganado")).toHaveAttribute(
       "title",
       "Contrato ganado",

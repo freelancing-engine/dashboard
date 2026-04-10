@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { selectProposalType, markProposalSubmitted as dbMarkSubmitted } from "@/lib/leads";
+import {
+  selectProposalType,
+  markProposalSubmitted as dbMarkSubmitted,
+} from "@/lib/leads";
 import { getLogger } from "@/lib/logger";
 
 const log = getLogger("actions");
@@ -13,7 +16,8 @@ const ERROR_MAP: Record<string, string> = {
   "expected approved_for_draft":
     "El lead debe estar aprobado para draft antes de generar propuesta. Usá 'Aprobar para draft' primero.",
   "Lead not found": "Lead no encontrado en la base de datos.",
-  "already has active proposal": "Ya existe una propuesta activa para este lead.",
+  "already has active proposal":
+    "Ya existe una propuesta activa para este lead.",
 };
 
 function friendlyError(msg: string): string {
@@ -52,7 +56,12 @@ export async function reviewLead(formData: FormData) {
 
   if (!resp.ok) {
     const errBody = await resp.text();
-    log.error("WF05 review-decision failed", { lead_id: leadId, decision, status: resp.status, body: errBody });
+    log.error("WF05 review-decision failed", {
+      lead_id: leadId,
+      decision,
+      status: resp.status,
+      body: errBody,
+    });
   }
 
   revalidatePath(`/leads/${leadId}`);
@@ -152,7 +161,12 @@ export async function logOutcome(formData: FormData) {
 
     if (!resp.ok) {
       const errBody = await resp.text();
-      log.error("WF07 log-outcome failed", { lead_id: leadId, outcome, status: resp.status, body: errBody });
+      log.error("WF07 log-outcome failed", {
+        lead_id: leadId,
+        outcome,
+        status: resp.status,
+        body: errBody,
+      });
       return { error: `Error registrando outcome (${resp.status})` };
     }
 

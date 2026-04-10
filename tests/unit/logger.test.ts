@@ -4,7 +4,11 @@
 import { getLogger } from "@/lib/logger";
 
 describe("getLogger", () => {
-  let consoleSpy: { log: jest.SpyInstance; warn: jest.SpyInstance; error: jest.SpyInstance };
+  let consoleSpy: {
+    log: jest.SpyInstance;
+    warn: jest.SpyInstance;
+    error: jest.SpyInstance;
+  };
 
   beforeEach(() => {
     consoleSpy = {
