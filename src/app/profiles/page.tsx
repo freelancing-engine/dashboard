@@ -98,6 +98,7 @@ export default function ProfileBuilderPage() {
     file_base64: string;
     mime: string;
   } | null>(null);
+  const [showTextInput, setShowTextInput] = useState(false);
   const [currentProfile, setCurrentProfile] = useState<Record<
     string,
     unknown
@@ -240,15 +241,17 @@ export default function ProfileBuilderPage() {
       {/* Step 1: Upload or Paste CV */}
       {step === 1 && (
         <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">
-            Paso 1: Subir o pegar tu CV
-          </h2>
+          <h2 className="mb-4 text-lg font-semibold">Paso 1: Subí tu CV</h2>
 
-          {/* File upload zone */}
-          <div className="mb-4">
+          {/* Primary: File upload zone */}
+          <div className="mb-6">
             <div
-              className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 transition-colors hover:border-blue-400 hover:bg-blue-50"
-              onClick={() => fileInputRef.current?.click()}
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 transition-colors ${
+                fileName && (fileData || cvText)
+                  ? "border-green-300 bg-green-50"
+                  : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
+              }`}
+              onClick={() => !uploading && fileInputRef.current?.click()}
               onDragOver={(e) => {
                 e.preventDefault();
                 e.currentTarget.classList.add("border-blue-400", "bg-blue-50");
@@ -277,31 +280,52 @@ export default function ProfileBuilderPage() {
               }}
             >
               {uploading ? (
-                <span className="text-sm text-blue-600">
-                  Procesando archivo...
-                </span>
-              ) : fileName && fileData ? (
                 <div className="text-center">
-                  <span className="text-sm font-medium text-green-700">
-                    ✓ {fileName}
+                  <div className="mb-2 h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent mx-auto" />
+                  <span className="text-sm font-medium text-blue-600">
+                    Procesando archivo...
                   </span>
-                  <p className="mt-1 text-xs text-gray-500">
-                    El PDF se enviará directo al modelo AI para análisis.
-                  </p>
                 </div>
-              ) : fileName ? (
+              ) : fileName && (fileData || cvText) ? (
                 <div className="text-center">
-                  <span className="text-sm font-medium text-green-700">
-                    ✓ {fileName}
+                  <svg
+                    className="mb-2 mx-auto h-10 w-10 text-green-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="text-base font-semibold text-green-700">
+                    {fileName}
                   </span>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Texto extraído correctamente. Podés editarlo abajo.
+                  <p className="mt-1 text-sm text-gray-500">
+                    {fileData
+                      ? "PDF listo — se enviará directo al modelo AI"
+                      : "Texto extraído correctamente"}
                   </p>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFileName(null);
+                      setFileData(null);
+                      setCvText("");
+                    }}
+                    className="mt-2 text-xs text-red-500 hover:underline"
+                  >
+                    Eliminar y subir otro
+                  </button>
                 </div>
               ) : (
                 <>
                   <svg
-                    className="mb-2 h-8 w-8 text-gray-400"
+                    className="mb-3 h-12 w-12 text-gray-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -313,11 +337,15 @@ export default function ProfileBuilderPage() {
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-base font-semibold text-gray-700">
                     Arrastrá un archivo o hacé click para seleccionar
                   </span>
-                  <span className="mt-1 text-xs text-gray-500">
+                  <span className="mt-1 text-sm text-gray-500">
                     PDF, DOCX o TXT — máximo 10 MB
+                  </span>
+                  <span className="mt-2 text-xs text-gray-400">
+                    PDF recomendado — se envía directo al modelo AI para mejor
+                    análisis
                   </span>
                 </>
               )}
@@ -331,21 +359,41 @@ export default function ProfileBuilderPage() {
             />
           </div>
 
-          <div className="mb-3 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs text-gray-400">
-              o pegá el texto directamente
-            </span>
-            <div className="h-px flex-1 bg-gray-200" />
-          </div>
+          {/* Secondary: Text paste (collapsed by default) */}
+          {!fileName && (
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => setShowTextInput(!showTextInput)}
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  className={`h-4 w-4 transition-transform ${showTextInput ? "rotate-90" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+                O pegá el texto de tu CV directamente
+              </button>
+              {showTextInput && (
+                <textarea
+                  className="mt-2 w-full rounded-lg border p-3 text-sm focus:border-blue-500 focus:outline-none"
+                  rows={8}
+                  placeholder="Pegá el texto completo de tu CV aquí..."
+                  value={cvText}
+                  onChange={(e) => setCvText(e.target.value)}
+                />
+              )}
+            </div>
+          )}
 
-          <textarea
-            className="mb-3 w-full rounded-lg border p-3 text-sm focus:border-blue-500 focus:outline-none"
-            rows={12}
-            placeholder="Pegá el texto completo de tu CV aquí..."
-            value={cvText}
-            onChange={(e) => setCvText(e.target.value)}
-          />
           <div className="flex items-center gap-4">
             <select
               className="rounded-lg border px-3 py-2 text-sm"
@@ -365,7 +413,9 @@ export default function ProfileBuilderPage() {
             <span className="text-xs text-gray-400">
               {fileData
                 ? "PDF listo para enviar"
-                : `Mínimo 50 caracteres (${cvText.length})`}
+                : cvText.length > 0
+                  ? `Mínimo 50 caracteres (${cvText.length})`
+                  : "Subí un archivo o pegá texto"}
             </span>
           </div>
         </div>
