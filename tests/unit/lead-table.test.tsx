@@ -24,6 +24,7 @@ function makeLead(overrides: Partial<LeadListItem> = {}): LeadListItem {
   return {
     lead_id: "lead_test",
     platform: "upwork",
+    source_type: "manual_link",
     title: "Build a React App",
     client_country: "US",
     budget_value: "$500",

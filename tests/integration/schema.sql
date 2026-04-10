@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS leads (
     external_source_id TEXT,
     platform platform_type NOT NULL,
     source_type source_type_enum NOT NULL,
+    source_notes TEXT,
     source_message_id TEXT,
 
     title TEXT NOT NULL,

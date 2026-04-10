@@ -8,6 +8,7 @@ function makeLead(overrides: Partial<Lead> = {}): Lead {
     lead_id: "lead_test",
     platform: "upwork",
     source_type: "manual_link",
+    source_notes: null,
     title: "Test Lead",
     raw_description: "Build something",
     normalized_description: null,

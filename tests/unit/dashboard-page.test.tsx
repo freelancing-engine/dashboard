@@ -45,6 +45,7 @@ import DashboardPage from "@/app/page";
 const sampleLeads: LeadListItem[] = Array.from({ length: 5 }, (_, i) => ({
   lead_id: `lead_${i + 1}`,
   platform: "upwork" as const,
+  source_type: "manual_link" as const,
   title: `Lead ${i + 1}`,
   client_country: "US",
   budget_value: "$1000",

@@ -278,7 +278,7 @@ describe("reviewLead (integration)", () => {
     );
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining("WF05 error: 500"),
+      expect.stringContaining("WF05 review-decision failed"),
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/leads/action_lead_1");
     consoleSpy.mockRestore();
