@@ -42,17 +42,17 @@ export default async function LeadDetailPage({
   if (!lead) notFound();
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className="page-enter mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       <Link
         href="/"
-        className="mb-4 inline-block text-sm text-blue-600 hover:underline"
+        className="btn-secondary mb-4 inline-block px-3 py-1.5 text-sm"
       >
         ← Volver al listado
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">{lead.title || "Sin título"}</h1>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gradient">{lead.title || "Sin título"}</h1>
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-muted)]">
           <span className="capitalize">{lead.platform}</span>
           {lead.client_country && <span>· {lead.client_country}</span>}
           {lead.budget_value && <span>· {lead.budget_value}</span>}
@@ -61,7 +61,7 @@ export default async function LeadDetailPage({
               href={lead.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 hover:underline"
+              className="text-[var(--color-primary-500)] transition-colors hover:text-[var(--color-primary-700)]"
             >
               Ver publicación ↗
             </a>
@@ -81,7 +81,7 @@ export default async function LeadDetailPage({
             </span>
           )}
           {lead.best_profile_angle && (
-            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700">
+            <span className="rounded-full bg-[var(--color-primary-50)] px-2.5 py-0.5 text-xs text-[var(--color-primary-700)]">
               {lead.best_profile_angle.replace(/_/g, " ")}
             </span>
           )}
@@ -90,8 +90,8 @@ export default async function LeadDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Score breakdown */}
-        <div className="rounded-lg border bg-white p-4 shadow-sm lg:col-span-1">
-          <h2 className="mb-3 font-semibold">
+        <div className="card-elevated animate-fade-in p-4 lg:col-span-1">
+          <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">
             Puntaje: {lead.score_total ?? "—"} / 100
           </h2>
           <div className="space-y-2">
@@ -100,15 +100,15 @@ export default async function LeadDetailPage({
               const pct = value !== null ? (value / max) * 100 : 0;
               return (
                 <div key={key}>
-                  <div className="flex justify-between text-xs text-gray-600">
+                  <div className="flex justify-between text-xs text-[var(--color-text-secondary)]">
                     <span>{label}</span>
-                    <span>
+                    <span className="tabular-nums">
                       {value ?? "—"} / {max}
                     </span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-gray-200">
+                  <div className="score-bar-track">
                     <div
-                      className={`h-2 rounded-full ${pct >= 70 ? "bg-green-500" : pct >= 40 ? "bg-yellow-400" : "bg-red-400"}`}
+                      className={`score-bar-fill ${pct >= 70 ? "score-bar-fill--high" : pct >= 40 ? "score-bar-fill--mid" : "score-bar-fill--low"}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -121,9 +121,9 @@ export default async function LeadDetailPage({
         {/* Lead info */}
         <div className="space-y-4 lg:col-span-2">
           {/* Description */}
-          <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h2 className="mb-2 font-semibold">Descripción</h2>
-            <p className="whitespace-pre-wrap text-sm text-gray-700">
+          <div className="card animate-fade-in-up p-4">
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Descripción</h2>
+            <p className="whitespace-pre-wrap text-sm text-[var(--color-text-secondary)]">
               {lead.normalized_description ||
                 lead.raw_description ||
                 "Sin descripción"}
@@ -136,29 +136,29 @@ export default async function LeadDetailPage({
           )}
 
           {/* Client info */}
-          <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h2 className="mb-2 font-semibold">Cliente</h2>
+          <div className="card animate-fade-in-up p-4" style={{ animationDelay: '60ms' }}>
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Cliente</h2>
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              <dt className="text-gray-500">Nombre</dt>
+              <dt className="text-[var(--color-text-muted)]">Nombre</dt>
               <dd>{lead.client_name || "—"}</dd>
-              <dt className="text-gray-500">País</dt>
+              <dt className="text-[var(--color-text-muted)]">País</dt>
               <dd>{lead.client_country || "—"}</dd>
-              <dt className="text-gray-500">Historial</dt>
+              <dt className="text-[var(--color-text-muted)]">Historial</dt>
               <dd>{lead.client_history_summary || "—"}</dd>
-              <dt className="text-gray-500">Gasto total</dt>
+              <dt className="text-[var(--color-text-muted)]">Gasto total</dt>
               <dd>{lead.client_spend || "—"}</dd>
-              <dt className="text-gray-500">Tasa contratación</dt>
+              <dt className="text-[var(--color-text-muted)]">Tasa contratación</dt>
               <dd>{lead.client_hire_rate || "—"}</dd>
-              <dt className="text-gray-500">Propuestas</dt>
+              <dt className="text-[var(--color-text-muted)]">Propuestas</dt>
               <dd>{lead.proposal_count || "—"}</dd>
             </dl>
           </div>
 
           {/* Tags and metadata */}
-          <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h2 className="mb-2 font-semibold">Detalles</h2>
+          <div className="card animate-fade-in-up p-4" style={{ animationDelay: '120ms' }}>
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Detalles</h2>
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              <dt className="text-gray-500">Stack tags</dt>
+              <dt className="text-[var(--color-text-muted)]">Stack tags</dt>
               <dd>
                 {lead.stack_tags?.length
                   ? lead.stack_tags.map((tag) => (
@@ -171,28 +171,28 @@ export default async function LeadDetailPage({
                     ))
                   : "—"}
               </dd>
-              <dt className="text-gray-500">Próximo paso</dt>
+              <dt className="text-[var(--color-text-muted)]">Próximo paso</dt>
               <dd>{lead.next_step?.replace(/_/g, " ") || "—"}</dd>
-              <dt className="text-gray-500">Tipo propuesta</dt>
+              <dt className="text-[var(--color-text-muted)]">Tipo propuesta</dt>
               <dd>{lead.best_proposal_type || "—"}</dd>
             </dl>
           </div>
 
           {/* Source attribution */}
-          <div className="rounded-lg border bg-white p-4 shadow-sm">
-            <h2 className="mb-2 font-semibold">Origen</h2>
+          <div className="card animate-fade-in-up p-4" style={{ animationDelay: '180ms' }}>
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Origen</h2>
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              <dt className="text-gray-500">Plataforma</dt>
+              <dt className="text-[var(--color-text-muted)]">Plataforma</dt>
               <dd className="capitalize">{lead.platform}</dd>
-              <dt className="text-gray-500">Tipo fuente</dt>
+              <dt className="text-[var(--color-text-muted)]">Tipo fuente</dt>
               <dd>{lead.source_type?.replace(/_/g, " ") || "—"}</dd>
               {lead.source_notes && (
                 <>
-                  <dt className="text-gray-500">Notas fuente</dt>
+                  <dt className="text-[var(--color-text-muted)]">Notas fuente</dt>
                   <dd>{lead.source_notes}</dd>
                 </>
               )}
-              <dt className="text-gray-500">Recibido</dt>
+              <dt className="text-[var(--color-text-muted)]">Recibido</dt>
               <dd>
                 {lead.received_at
                   ? new Date(lead.received_at).toLocaleDateString("es-AR")

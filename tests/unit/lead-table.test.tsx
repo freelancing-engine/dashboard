@@ -127,9 +127,9 @@ describe("LeadTable", () => {
       />,
     );
 
-    const greenBars = container.querySelectorAll(".bg-green-500");
-    const yellowBars = container.querySelectorAll(".bg-yellow-400");
-    const redBars = container.querySelectorAll(".bg-red-400");
+    const greenBars = container.querySelectorAll(".score-bar-fill--high");
+    const yellowBars = container.querySelectorAll(".score-bar-fill--mid");
+    const redBars = container.querySelectorAll(".score-bar-fill--low");
 
     expect(greenBars.length).toBe(1);
     expect(yellowBars.length).toBe(1);

@@ -205,10 +205,10 @@ export default function ProfileBuilderPage() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className="page-enter mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Profile Builder</h1>
-        <a href="/" className="text-sm text-blue-600 hover:underline">
+        <h1 className="text-2xl font-bold text-gradient">Profile Builder</h1>
+        <a href="/" className="btn-secondary px-3 py-1.5 text-sm">
           ← Volver al dashboard
         </a>
       </div>
@@ -218,14 +218,14 @@ export default function ProfileBuilderPage() {
         {[1, 2, 3].map((s) => (
           <div
             key={s}
-            className={`flex h-8 w-8 items-center justify-center rounded-full font-bold ${
-              step >= s ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+            className={`flex h-8 w-8 items-center justify-center rounded-full font-bold transition-all duration-300 ${
+              step >= s ? "bg-[var(--color-primary-600)] text-white shadow-[0_0_12px_rgb(79_70_229/0.4)]" : "bg-gray-200 text-[var(--color-text-muted)]"
             }`}
           >
             {s}
           </div>
         ))}
-        <span className="text-gray-500">
+        <span className="text-[var(--color-text-muted)]">
           {step === 1 && "Subir o pegar CV"}
           {step === 2 && "Revisar análisis"}
           {step === 3 && "Perfiles generados"}
@@ -233,15 +233,15 @@ export default function ProfileBuilderPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-[var(--radius-lg)] border border-red-200 bg-red-50 p-3 text-sm text-red-700 animate-scale-in">
           {error}
         </div>
       )}
 
       {/* Step 1: Upload or Paste CV */}
       {step === 1 && (
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Paso 1: Subí tu CV</h2>
+        <div className="card p-6">
+          <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">Paso 1: Subí tu CV</h2>
 
           {/* Primary: File upload zone */}
           <div className="mb-6">
@@ -406,7 +406,7 @@ export default function ProfileBuilderPage() {
             <button
               onClick={handleParseCV}
               disabled={loading || (!fileData && cvText.length < 50)}
-              className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="btn-primary px-6 py-2 text-sm font-medium disabled:opacity-50"
             >
               {loading ? "Analizando..." : "Analizar CV"}
             </button>
@@ -424,13 +424,13 @@ export default function ProfileBuilderPage() {
       {/* Step 2: Review parsed CV + configure generation */}
       {step === 2 && parsedCV && (
         <div className="space-y-6">
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
-            <h2 className="mb-3 text-lg font-semibold">
+          <div className="card p-6">
+            <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-primary)]">
               Paso 2: Análisis del CV
             </h2>
 
             {/* Positioning suggestion */}
-            <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm">
+            <div className="mb-4 rounded-[var(--radius-lg)] bg-[var(--color-primary-50)] p-3 text-sm">
               <span className="font-semibold">Posicionamiento sugerido:</span>{" "}
               {parsedCV.positioning_suggestion}
             </div>

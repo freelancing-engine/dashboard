@@ -38,19 +38,19 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className="page-enter mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Freelancing Engine — Leads</h1>
+        <h1 className="text-2xl font-bold text-gradient">Freelancing Engine — Leads</h1>
         <div className="flex gap-2">
           <Link
             href="/profiles"
-            className="rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+            className="btn-secondary px-4 py-2 text-sm font-medium"
           >
             Profile Builder
           </Link>
           <Link
             href="/metrics"
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="btn-primary px-4 py-2 text-sm font-medium"
           >
             Ver métricas
           </Link>
@@ -68,7 +68,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       <LeadTable leads={leads} />
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+        <div className="mt-4 flex items-center justify-between text-sm text-[var(--color-text-muted)]">
           <span>
             {total} leads — página {page} de {totalPages}
           </span>
@@ -76,7 +76,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             {page > 1 && (
               <a
                 href={`?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`}
-                className="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300"
+                className="btn-secondary px-3 py-1 text-xs"
               >
                 ← Anterior
               </a>
@@ -84,7 +84,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             {page < totalPages && (
               <a
                 href={`?${new URLSearchParams({ ...params, page: String(page + 1) }).toString()}`}
-                className="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300"
+                className="btn-secondary px-3 py-1 text-xs"
               >
                 Siguiente →
               </a>

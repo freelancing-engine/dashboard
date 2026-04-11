@@ -55,9 +55,9 @@ export function Filters({
   );
 
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-3">
+    <div className="mb-4 flex flex-wrap items-center gap-3 animate-fade-in">
       <select
-        className="rounded border bg-white px-3 py-1.5 text-sm"
+        className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 focus:border-[var(--color-primary-400)] focus:ring-2 focus:ring-[var(--color-primary-100)] focus:outline-none"
         value={currentStatus || ""}
         onChange={(e) => updateFilter("status", e.target.value)}
       >
@@ -69,7 +69,7 @@ export function Filters({
       </select>
 
       <select
-        className="rounded border bg-white px-3 py-1.5 text-sm"
+        className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 focus:border-[var(--color-primary-400)] focus:ring-2 focus:ring-[var(--color-primary-100)] focus:outline-none"
         value={currentPlatform || ""}
         onChange={(e) => updateFilter("platform", e.target.value)}
       >
@@ -83,7 +83,7 @@ export function Filters({
       <input
         type="text"
         placeholder="Buscar por título..."
-        className="rounded border bg-white px-3 py-1.5 text-sm"
+        className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm text-[var(--color-text-secondary)] shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary-400)] focus:ring-2 focus:ring-[var(--color-primary-100)] focus:outline-none"
         defaultValue={currentSearch || ""}
         onKeyDown={(e) => {
           if (e.key === "Enter") {

@@ -13,7 +13,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-gray-50 text-gray-900 antialiased">{children}</body>
+      <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased">
+        <div className="fixed inset-0 -z-10 overflow-hidden">
+          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-[var(--color-primary-100)] opacity-40 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-[var(--color-primary-50)] opacity-30 blur-3xl" />
+        </div>
+        {children}
+      </body>
     </html>
   );
 }
