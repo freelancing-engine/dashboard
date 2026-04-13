@@ -1,0 +1,21 @@
+# terraform.tfvars — DO NOT COMMIT (contains secrets)
+# Copy terraform.tfvars.example → terraform.tfvars and fill in.
+
+vercel_api_token = ""
+
+# Leave null for personal account (no team)
+# vercel_org_id = "team_xxxxx"
+
+github_repo       = "freelancing-engine/dashboard"
+production_branch = "main"
+
+# Neon Postgres pooler connection string
+# Get from: https://console.neon.tech → Connection Details → Pooled
+database_url = "postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/freelancing_engine?sslmode=require"
+
+# n8n webhook base URL (when deployed to Fly.io)
+n8n_webhook_url = "http://n8n:5678/webhook"
+
+# Agent service (when deployed to Fly.io)
+agent_service_url   = "http://localhost:8000"
+agent_service_token = ""

@@ -78,7 +78,7 @@ export function OutcomeTimeline({ entries }: { entries: OutcomeLogEntry[] }) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="rounded-lg border bg-white p-4 shadow-sm">
+    <div className="rounded-lg card p-4">
       <h2 className="mb-3 font-semibold">Historial de acciones</h2>
       <div className="space-y-3">
         {entries.map((entry) => {
@@ -91,14 +91,14 @@ export function OutcomeTimeline({ entries }: { entries: OutcomeLogEntry[] }) {
               <span className="mt-0.5 text-base leading-none">{icon}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-medium text-gray-900">{label}</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="font-medium text-[#f0eeff]">{label}</span>
+                  <span className="text-xs text-[#8578a4]">
                     {formatDate(entry.created_at)}
                   </span>
                 </div>
-                {summary && <p className="mt-0.5 text-gray-600">{summary}</p>}
+                {summary && <p className="mt-0.5 text-[#a898cc]">{summary}</p>}
                 {entry.actor_type && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-[#8578a4]">
                     por {entry.actor_type}
                   </span>
                 )}

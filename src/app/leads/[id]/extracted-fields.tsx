@@ -31,10 +31,10 @@ function ConfidenceBadge({ value }: { value: number }) {
   const pct = Math.round(value * 100);
   const color =
     pct >= 75
-      ? "bg-green-100 text-green-800"
+      ? "bg-[#a0ff7a]/15 text-[#a0ff7a]"
       : pct >= 50
-        ? "bg-yellow-100 text-yellow-800"
-        : "bg-red-100 text-red-700";
+        ? "bg-[#ff8a50]/15 text-[#ff8a50]"
+        : "bg-[#ff5c7a]/15 text-[#ff5c7a]";
   return (
     <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
       {pct}% confianza
@@ -42,7 +42,7 @@ function ConfidenceBadge({ value }: { value: number }) {
   );
 }
 
-function TagList({ items, color = "bg-blue-50 text-blue-700" }: { items: string[]; color?: string }) {
+function TagList({ items, color = "bg-[#5ce0d8]/10 text-[#5ce0d8]" }: { items: string[]; color?: string }) {
   return (
     <div className="flex flex-wrap gap-1">
       {items.map((item) => (
@@ -61,7 +61,7 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
   const hasIntegrations = fields.integration_points && fields.integration_points.length > 0;
 
   return (
-    <div className="rounded-lg border bg-white p-4 shadow-sm">
+    <div className="rounded-lg card p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-semibold">Análisis IA</h2>
         {fields.extraction_confidence != null && (
@@ -71,7 +71,7 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
 
       {/* AI Summary */}
       {fields.ai_summary && (
-        <p className="mb-4 rounded bg-gray-50 p-3 text-sm text-gray-700">
+        <p className="mb-4 rounded bg-[#0c0614]/60 p-3 text-sm text-[#a898cc]">
           {fields.ai_summary}
         </p>
       )}
@@ -80,7 +80,7 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
       <dl className="mb-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">
         {fields.project_type && (
           <>
-            <dt className="text-gray-500">Tipo proyecto</dt>
+            <dt className="text-[#8578a4]">Tipo proyecto</dt>
             <dd className="sm:col-span-2">
               {PROJECT_TYPE_LABELS[fields.project_type] || fields.project_type}
             </dd>
@@ -88,13 +88,13 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
         )}
         {fields.estimated_duration && (
           <>
-            <dt className="text-gray-500">Duración</dt>
+            <dt className="text-[#8578a4]">Duración</dt>
             <dd className="sm:col-span-2">{fields.estimated_duration}</dd>
           </>
         )}
         {fields.work_arrangement && (
           <>
-            <dt className="text-gray-500">Modalidad</dt>
+            <dt className="text-[#8578a4]">Modalidad</dt>
             <dd className="sm:col-span-2">
               {WORK_LABELS[fields.work_arrangement] || fields.work_arrangement}
             </dd>
@@ -102,13 +102,13 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
         )}
         {fields.timezone_preference && (
           <>
-            <dt className="text-gray-500">Zona horaria</dt>
+            <dt className="text-[#8578a4]">Zona horaria</dt>
             <dd className="sm:col-span-2">{fields.timezone_preference}</dd>
           </>
         )}
         {fields.team_size_hint && (
           <>
-            <dt className="text-gray-500">Equipo</dt>
+            <dt className="text-[#8578a4]">Equipo</dt>
             <dd className="sm:col-span-2">
               {TEAM_LABELS[fields.team_size_hint] || fields.team_size_hint}
             </dd>
@@ -116,7 +116,7 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
         )}
         {fields.industry_domain && (
           <>
-            <dt className="text-gray-500">Industria</dt>
+            <dt className="text-[#8578a4]">Industria</dt>
             <dd className="sm:col-span-2 capitalize">{fields.industry_domain.replace(/_/g, " ")}</dd>
           </>
         )}
@@ -125,22 +125,22 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
       {/* Skills */}
       {hasSkills && (
         <div className="mb-3">
-          <h3 className="mb-1 text-xs font-medium text-gray-500">Skills requeridos</h3>
+          <h3 className="mb-1 text-xs font-medium text-[#8578a4]">Skills requeridos</h3>
           <TagList items={fields.required_skills!} />
         </div>
       )}
       {hasNice && (
         <div className="mb-3">
-          <h3 className="mb-1 text-xs font-medium text-gray-500">Nice to have</h3>
-          <TagList items={fields.nice_to_have_skills!} color="bg-gray-100 text-gray-600" />
+          <h3 className="mb-1 text-xs font-medium text-[#8578a4]">Nice to have</h3>
+          <TagList items={fields.nice_to_have_skills!} color="bg-[#1c1430] text-[#a898cc]" />
         </div>
       )}
 
       {/* Deliverables */}
       {hasDeliverables && (
         <div className="mb-3">
-          <h3 className="mb-1 text-xs font-medium text-gray-500">Entregables</h3>
-          <ul className="list-inside list-disc text-sm text-gray-700">
+          <h3 className="mb-1 text-xs font-medium text-[#8578a4]">Entregables</h3>
+          <ul className="list-inside list-disc text-sm text-[#a898cc]">
             {fields.key_deliverables!.map((d) => (
               <li key={d}>{d}</li>
             ))}
@@ -151,8 +151,8 @@ export function ExtractedFieldsCard({ fields }: { fields: ExtractedFields }) {
       {/* Integrations */}
       {hasIntegrations && (
         <div>
-          <h3 className="mb-1 text-xs font-medium text-gray-500">Integraciones</h3>
-          <TagList items={fields.integration_points!} color="bg-purple-50 text-purple-700" />
+          <h3 className="mb-1 text-xs font-medium text-[#8578a4]">Integraciones</h3>
+          <TagList items={fields.integration_points!} color="bg-[#b4a0d4]/10 text-[#b4a0d4]" />
         </div>
       )}
     </div>

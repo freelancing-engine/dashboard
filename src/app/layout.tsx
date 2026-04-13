@@ -1,5 +1,24 @@
 import type { Metadata } from "next";
+import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { A11yProvider } from "./components/accessibility-provider";
+import AccessibilityToggle from "./components/accessibility-toggle";
+import BackgroundWrapper from "./components/background-wrapper";
+import CursorWrapper from "./components/cursor-wrapper";
+import SmoothScroll from "./components/smooth-scroll";
+import PageTransitionProvider from "./components/page-transition-provider";
 import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  variable: "--font-display",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
   title: "Freelancing Engine — Dashboard",
@@ -12,13 +31,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] antialiased">
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-[var(--color-primary-100)] opacity-40 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-[var(--color-primary-50)] opacity-30 blur-3xl" />
-        </div>
-        {children}
+    <html
+      lang="es"
+      className={`${spaceGrotesk.variable} ${spaceMono.variable}`}
+    >
+      <body className="min-h-screen bg-[#0c0614] text-[#f0eeff] antialiased">
+        <A11yProvider>
+          <BackgroundWrapper />
+          <CursorWrapper />
+          <SmoothScroll>
+            <PageTransitionProvider>{children}</PageTransitionProvider>
+          </SmoothScroll>
+          <AccessibilityToggle />
+        </A11yProvider>
       </body>
     </html>
   );

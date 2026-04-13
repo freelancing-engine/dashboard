@@ -9,6 +9,7 @@ import { GenerateProposalButton } from "./generate-proposal-button";
 import { ExtractedFieldsCard } from "./extracted-fields";
 import { OutcomeActions } from "./outcome-actions";
 import { OutcomeTimeline } from "./outcome-timeline";
+import SpiderChart from "../../components/spider-chart";
 
 const SCORE_DIMENSIONS = [
   { key: "score_technical_fit", label: "Technical Fit", max: 20 },
@@ -22,10 +23,10 @@ const SCORE_DIMENSIONS = [
 ] as const;
 
 const VERDICT_BADGE: Record<string, string> = {
-  apply_now: "bg-green-600 text-white",
-  strong_maybe: "bg-emerald-100 text-emerald-800",
-  maybe: "bg-yellow-100 text-yellow-800",
-  ignore: "bg-gray-200 text-gray-500",
+  apply_now: "bg-[#a0ff7a]/15 text-[#a0ff7a] border border-[#a0ff7a]/30",
+  strong_maybe: "bg-[#5ce0d8]/10 text-[#5ce0d8] border border-[#5ce0d8]/20",
+  maybe: "bg-[#ff8a50]/10 text-[#ff8a50] border border-[#ff8a50]/20",
+  ignore: "bg-[#766a94]/10 text-[#8578a4] border border-[#766a94]/20",
 };
 
 export default async function LeadDetailPage({
@@ -51,7 +52,9 @@ export default async function LeadDetailPage({
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gradient">{lead.title || "Sin título"}</h1>
+        <h1 className="text-2xl font-bold text-gradient">
+          {lead.title || "Sin título"}
+        </h1>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-muted)]">
           <span className="capitalize">{lead.platform}</span>
           {lead.client_country && <span>· {lead.client_country}</span>}
@@ -61,7 +64,7 @@ export default async function LeadDetailPage({
               href={lead.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-primary-500)] transition-colors hover:text-[var(--color-primary-700)]"
+              className="text-[#5ce0d8] transition-colors hover:text-[#a0ff7a]"
             >
               Ver publicación ↗
             </a>
@@ -81,7 +84,7 @@ export default async function LeadDetailPage({
             </span>
           )}
           {lead.best_profile_angle && (
-            <span className="rounded-full bg-[var(--color-primary-50)] px-2.5 py-0.5 text-xs text-[var(--color-primary-700)]">
+            <span className="rounded-full bg-[#a0ff7a]/10 px-2.5 py-0.5 text-xs text-[#a0ff7a]">
               {lead.best_profile_angle.replace(/_/g, " ")}
             </span>
           )}
@@ -94,35 +97,22 @@ export default async function LeadDetailPage({
           <h2 className="mb-3 font-semibold text-[var(--color-text-primary)]">
             Puntaje: {lead.score_total ?? "—"} / 100
           </h2>
-          <div className="space-y-2">
-            {SCORE_DIMENSIONS.map(({ key, label, max }) => {
-              const value = lead[key as keyof typeof lead] as number | null;
-              const pct = value !== null ? (value / max) * 100 : 0;
-              return (
-                <div key={key}>
-                  <div className="flex justify-between text-xs text-[var(--color-text-secondary)]">
-                    <span>{label}</span>
-                    <span className="tabular-nums">
-                      {value ?? "—"} / {max}
-                    </span>
-                  </div>
-                  <div className="score-bar-track">
-                    <div
-                      className={`score-bar-fill ${pct >= 70 ? "score-bar-fill--high" : pct >= 40 ? "score-bar-fill--mid" : "score-bar-fill--low"}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <SpiderChart
+            dimensions={SCORE_DIMENSIONS.map(({ key, label, max }) => ({
+              label,
+              value: (lead[key as keyof typeof lead] as number | null) ?? 0,
+              max,
+            }))}
+          />
         </div>
 
         {/* Lead info */}
         <div className="space-y-4 lg:col-span-2">
           {/* Description */}
           <div className="card animate-fade-in-up p-4">
-            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Descripción</h2>
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">
+              Descripción
+            </h2>
             <p className="whitespace-pre-wrap text-sm text-[var(--color-text-secondary)]">
               {lead.normalized_description ||
                 lead.raw_description ||
@@ -136,8 +126,13 @@ export default async function LeadDetailPage({
           )}
 
           {/* Client info */}
-          <div className="card animate-fade-in-up p-4" style={{ animationDelay: '60ms' }}>
-            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Cliente</h2>
+          <div
+            className="card animate-fade-in-up p-4"
+            style={{ animationDelay: "60ms" }}
+          >
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">
+              Cliente
+            </h2>
             <dl className="grid grid-cols-2 gap-2 text-sm">
               <dt className="text-[var(--color-text-muted)]">Nombre</dt>
               <dd>{lead.client_name || "—"}</dd>
@@ -147,7 +142,9 @@ export default async function LeadDetailPage({
               <dd>{lead.client_history_summary || "—"}</dd>
               <dt className="text-[var(--color-text-muted)]">Gasto total</dt>
               <dd>{lead.client_spend || "—"}</dd>
-              <dt className="text-[var(--color-text-muted)]">Tasa contratación</dt>
+              <dt className="text-[var(--color-text-muted)]">
+                Tasa contratación
+              </dt>
               <dd>{lead.client_hire_rate || "—"}</dd>
               <dt className="text-[var(--color-text-muted)]">Propuestas</dt>
               <dd>{lead.proposal_count || "—"}</dd>
@@ -155,8 +152,13 @@ export default async function LeadDetailPage({
           </div>
 
           {/* Tags and metadata */}
-          <div className="card animate-fade-in-up p-4" style={{ animationDelay: '120ms' }}>
-            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Detalles</h2>
+          <div
+            className="card animate-fade-in-up p-4"
+            style={{ animationDelay: "120ms" }}
+          >
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">
+              Detalles
+            </h2>
             <dl className="grid grid-cols-2 gap-2 text-sm">
               <dt className="text-[var(--color-text-muted)]">Stack tags</dt>
               <dd>
@@ -164,7 +166,7 @@ export default async function LeadDetailPage({
                   ? lead.stack_tags.map((tag) => (
                       <span
                         key={tag}
-                        className="mr-1 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs"
+                        className="mr-1 inline-block rounded bg-[#1c1430] px-2 py-0.5 text-xs text-[#a898cc]"
                       >
                         {tag}
                       </span>
@@ -179,8 +181,13 @@ export default async function LeadDetailPage({
           </div>
 
           {/* Source attribution */}
-          <div className="card animate-fade-in-up p-4" style={{ animationDelay: '180ms' }}>
-            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">Origen</h2>
+          <div
+            className="card animate-fade-in-up p-4"
+            style={{ animationDelay: "180ms" }}
+          >
+            <h2 className="mb-2 font-semibold text-[var(--color-text-primary)]">
+              Origen
+            </h2>
             <dl className="grid grid-cols-2 gap-2 text-sm">
               <dt className="text-[var(--color-text-muted)]">Plataforma</dt>
               <dd className="capitalize">{lead.platform}</dd>
@@ -188,7 +195,9 @@ export default async function LeadDetailPage({
               <dd>{lead.source_type?.replace(/_/g, " ") || "—"}</dd>
               {lead.source_notes && (
                 <>
-                  <dt className="text-[var(--color-text-muted)]">Notas fuente</dt>
+                  <dt className="text-[var(--color-text-muted)]">
+                    Notas fuente
+                  </dt>
                   <dd>{lead.source_notes}</dd>
                 </>
               )}

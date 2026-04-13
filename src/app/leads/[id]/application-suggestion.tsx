@@ -20,22 +20,22 @@ const VERDICT_LABELS: Record<
   apply_now: {
     label: "Aplicar ahora",
     desc: "Lead de alta prioridad — match fuerte con perfil y buen potencial de cierre",
-    color: "bg-green-50 border-green-200 text-green-800",
+    color: "bg-[#a0ff7a]/10 border-[#a0ff7a]/20 text-[#f0eeff]",
   },
   strong_maybe: {
     label: "Posibilidad fuerte",
     desc: "Buen match general — vale la pena aplicar con propuesta cuidadosa",
-    color: "bg-emerald-50 border-emerald-200 text-emerald-800",
+    color: "bg-[#5ce0d8]/10 border-[#5ce0d8]/20 text-[#f0eeff]",
   },
   maybe: {
     label: "Posible",
     desc: "Match parcial — aplicar solo si hay tiempo disponible",
-    color: "bg-yellow-50 border-yellow-200 text-yellow-800",
+    color: "bg-[#ff8a50]/10 border-[#ff8a50]/20 text-[#f0eeff]",
   },
   ignore: {
     label: "Ignorar",
     desc: "No vale la pena — mal match, bajo presupuesto o red flags",
-    color: "bg-gray-50 border-gray-200 text-gray-500",
+    color: "bg-[#766a94]/10 border-[#766a94]/20 text-[#8578a4]",
   },
 };
 
@@ -56,7 +56,7 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
 
   return (
     <div
-      className={`rounded-lg border p-4 shadow-sm ${verdict?.color || "bg-white border-gray-200"}`}
+      className={`rounded-lg border p-4 ${verdict?.color || "bg-[#1c1430] border-[rgba(180,160,212,0.12)]"}`}
     >
       <div className="mb-3 flex items-center gap-2">
         <span className="text-lg">
@@ -72,7 +72,7 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
       <div className="grid gap-2 text-sm">
         {lead.best_profile_angle && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">
+            <span className="font-medium text-[#a898cc] shrink-0">
               Perfil recomendado:
             </span>
             <span className="font-semibold">
@@ -84,7 +84,7 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
 
         {lead.best_proposal_type && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">
+            <span className="font-medium text-[#a898cc] shrink-0">
               Tipo de propuesta:
             </span>
             <span className="font-semibold">
@@ -96,7 +96,7 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
 
         {lead.next_step && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">
+            <span className="font-medium text-[#a898cc] shrink-0">
               Próximo paso:
             </span>
             <span className="font-semibold">
@@ -108,7 +108,7 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
 
         {lead.score_total !== null && (
           <div className="flex items-start gap-2">
-            <span className="font-medium text-gray-600 shrink-0">
+            <span className="font-medium text-[#a898cc] shrink-0">
               Puntaje total:
             </span>
             <span className="font-semibold">{lead.score_total} / 100</span>
@@ -117,8 +117,8 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
       </div>
 
       {lead.reasoning_summary && (
-        <div className="mt-3 rounded bg-white/60 p-3">
-          <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">
+        <div className="mt-3 rounded bg-[#0c0614]/60 p-3">
+          <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-[#8578a4]">
             Razonamiento del agente
           </h3>
           <p className="whitespace-pre-wrap text-sm">
@@ -129,14 +129,14 @@ export function ApplicationSuggestion({ lead }: { lead: Lead }) {
 
       {lead.red_flags && lead.red_flags.length > 0 && (
         <div className="mt-3">
-          <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-red-600">
+          <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-[#ff5c7a]">
             Red flags
           </h3>
           <div className="flex flex-wrap gap-1">
             {lead.red_flags.map((flag, i) => (
               <span
                 key={i}
-                className="inline-block rounded bg-red-100 px-2 py-0.5 text-xs text-red-700"
+                className="inline-block rounded bg-[#ff5c7a]/10 px-2 py-0.5 text-xs text-[#ff5c7a]"
               >
                 {flag}
               </span>

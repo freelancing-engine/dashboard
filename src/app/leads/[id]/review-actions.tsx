@@ -7,28 +7,28 @@ const ACTIONS = [
   {
     decision: "approve_for_draft",
     label: "Aprobar para draft",
-    color: "bg-green-600 hover:bg-green-700 text-white",
+    color: "bg-[#a0ff7a]/20 hover:bg-[#a0ff7a]/30 text-[#a0ff7a]",
     hint: "Genera propuesta automáticamente",
   },
   {
     decision: "save_for_later",
     label: "Guardar",
-    color: "bg-blue-100 hover:bg-blue-200 text-blue-800",
+    color: "bg-[#5ce0d8]/15 hover:bg-[#5ce0d8]/25 text-[#5ce0d8]",
   },
   {
     decision: "archive",
     label: "Archivar",
-    color: "bg-gray-200 hover:bg-gray-300 text-gray-700",
+    color: "bg-[#766a94]/15 hover:bg-[#766a94]/25 text-[#8578a4]",
   },
   {
     decision: "re_score",
     label: "Re-puntuar",
-    color: "bg-yellow-100 hover:bg-yellow-200 text-yellow-800",
+    color: "bg-[#ff8a50]/15 hover:bg-[#ff8a50]/25 text-[#ff8a50]",
   },
   {
     decision: "reject",
     label: "Rechazar",
-    color: "bg-red-100 hover:bg-red-200 text-red-800",
+    color: "bg-[#ff5c7a]/15 hover:bg-[#ff5c7a]/25 text-[#ff5c7a]",
   },
 ];
 
@@ -53,19 +53,19 @@ export function ReviewActions({
   if (!showActions) return null;
 
   return (
-    <div className="rounded-lg border bg-white p-4 shadow-sm">
+    <div className="rounded-lg card p-4">
       <h2 className="mb-3 font-semibold">Acciones de revisión</h2>
       <form action={formAction}>
         <input type="hidden" name="leadId" value={leadId} />
         <div className="mb-3">
-          <label htmlFor="reason" className="mb-1 block text-sm text-gray-600">
+          <label htmlFor="reason" className="mb-1 block text-sm text-[#a898cc]">
             Motivo (opcional)
           </label>
           <input
             id="reason"
             name="reason"
             type="text"
-            className="w-full rounded border px-3 py-1.5 text-sm"
+            className="w-full rounded border border-[rgba(180,160,212,0.12)] bg-[#1c1430] px-3 py-1.5 text-sm text-[#f0eeff]"
             placeholder="Razón de la decisión..."
           />
         </div>

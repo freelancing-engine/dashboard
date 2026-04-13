@@ -38,7 +38,7 @@ describe("ExtractedFieldsCard", () => {
     );
     const badge = screen.getByText("85% confianza");
     expect(badge).toBeInTheDocument();
-    expect(badge.className).toContain("bg-green-100");
+    expect(badge.className).toContain("bg-[#a0ff7a]/15");
   });
 
   it("shows yellow confidence badge for 50-74%", () => {
@@ -49,7 +49,7 @@ describe("ExtractedFieldsCard", () => {
     );
     const badge = screen.getByText("60% confianza");
     expect(badge).toBeInTheDocument();
-    expect(badge.className).toContain("bg-yellow-100");
+    expect(badge.className).toContain("bg-[#ff8a50]/15");
   });
 
   it("shows red confidence badge for < 50%", () => {
@@ -60,7 +60,7 @@ describe("ExtractedFieldsCard", () => {
     );
     const badge = screen.getByText("30% confianza");
     expect(badge).toBeInTheDocument();
-    expect(badge.className).toContain("bg-red-100");
+    expect(badge.className).toContain("bg-[#ff5c7a]/15");
   });
 
   it("hides confidence badge when not provided", () => {

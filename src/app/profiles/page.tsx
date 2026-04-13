@@ -219,7 +219,9 @@ export default function ProfileBuilderPage() {
           <div
             key={s}
             className={`flex h-8 w-8 items-center justify-center rounded-full font-bold transition-all duration-300 ${
-              step >= s ? "bg-[var(--color-primary-600)] text-white shadow-[0_0_12px_rgb(79_70_229/0.4)]" : "bg-gray-200 text-[var(--color-text-muted)]"
+              step >= s
+                ? "bg-[var(--color-primary-600)] text-white shadow-[0_0_12px_rgba(160,255,122,0.3)]"
+                : "bg-[#1c1430] text-[var(--color-text-muted)]"
             }`}
           >
             {s}
@@ -233,7 +235,7 @@ export default function ProfileBuilderPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-[var(--radius-lg)] border border-red-200 bg-red-50 p-3 text-sm text-red-700 animate-scale-in">
+        <div className="mb-4 rounded-[var(--radius-lg)] border border-[#ff5c7a]/30 bg-[#ff5c7a]/10 p-3 text-sm text-[#ff5c7a] animate-scale-in">
           {error}
         </div>
       )}
@@ -241,32 +243,37 @@ export default function ProfileBuilderPage() {
       {/* Step 1: Upload or Paste CV */}
       {step === 1 && (
         <div className="card p-6">
-          <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">Paso 1: Subí tu CV</h2>
+          <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
+            Paso 1: Subí tu CV
+          </h2>
 
           {/* Primary: File upload zone */}
           <div className="mb-6">
             <div
               className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 transition-colors ${
                 fileName && (fileData || cvText)
-                  ? "border-green-300 bg-green-50"
-                  : "border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50"
+                  ? "border-[#a0ff7a]/30 bg-[#a0ff7a]/10"
+                  : "border-[#b4a0d4]/20 bg-[#0c0614]/60 hover:border-[#5ce0d8]/40 hover:bg-[#5ce0d8]/10"
               }`}
               onClick={() => !uploading && fileInputRef.current?.click()}
               onDragOver={(e) => {
                 e.preventDefault();
-                e.currentTarget.classList.add("border-blue-400", "bg-blue-50");
+                e.currentTarget.classList.add(
+                  "border-[#5ce0d8]/40",
+                  "bg-[#5ce0d8]/10",
+                );
               }}
               onDragLeave={(e) => {
                 e.currentTarget.classList.remove(
-                  "border-blue-400",
-                  "bg-blue-50",
+                  "border-[#5ce0d8]/40",
+                  "bg-[#5ce0d8]/10",
                 );
               }}
               onDrop={(e) => {
                 e.preventDefault();
                 e.currentTarget.classList.remove(
-                  "border-blue-400",
-                  "bg-blue-50",
+                  "border-[#5ce0d8]/40",
+                  "bg-[#5ce0d8]/10",
                 );
                 const file = e.dataTransfer.files?.[0];
                 if (file && fileInputRef.current) {
@@ -281,15 +288,15 @@ export default function ProfileBuilderPage() {
             >
               {uploading ? (
                 <div className="text-center">
-                  <div className="mb-2 h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent mx-auto" />
-                  <span className="text-sm font-medium text-blue-600">
+                  <div className="mb-2 h-8 w-8 animate-spin rounded-full border-2 border-[#a0ff7a] border-t-transparent mx-auto" />
+                  <span className="text-sm font-medium text-[#5ce0d8]">
                     Procesando archivo...
                   </span>
                 </div>
               ) : fileName && (fileData || cvText) ? (
                 <div className="text-center">
                   <svg
-                    className="mb-2 mx-auto h-10 w-10 text-green-500"
+                    className="mb-2 mx-auto h-10 w-10 text-[#a0ff7a]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -301,10 +308,10 @@ export default function ProfileBuilderPage() {
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-base font-semibold text-green-700">
+                  <span className="text-base font-semibold text-[#a0ff7a]">
                     {fileName}
                   </span>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-[#8578a4]">
                     {fileData
                       ? "PDF listo — se enviará directo al modelo AI"
                       : "Texto extraído correctamente"}
@@ -317,7 +324,7 @@ export default function ProfileBuilderPage() {
                       setFileData(null);
                       setCvText("");
                     }}
-                    className="mt-2 text-xs text-red-500 hover:underline"
+                    className="mt-2 text-xs text-[#ff5c7a] hover:underline"
                   >
                     Eliminar y subir otro
                   </button>
@@ -325,7 +332,7 @@ export default function ProfileBuilderPage() {
               ) : (
                 <>
                   <svg
-                    className="mb-3 h-12 w-12 text-gray-400"
+                    className="mb-3 h-12 w-12 text-[#8578a4]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -337,13 +344,13 @@ export default function ProfileBuilderPage() {
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  <span className="text-base font-semibold text-gray-700">
+                  <span className="text-base font-semibold text-[#a898cc]">
                     Arrastrá un archivo o hacé click para seleccionar
                   </span>
-                  <span className="mt-1 text-sm text-gray-500">
+                  <span className="mt-1 text-sm text-[#8578a4]">
                     PDF, DOCX o TXT — máximo 10 MB
                   </span>
-                  <span className="mt-2 text-xs text-gray-400">
+                  <span className="mt-2 text-xs text-[#8578a4]">
                     PDF recomendado — se envía directo al modelo AI para mejor
                     análisis
                   </span>
@@ -365,7 +372,7 @@ export default function ProfileBuilderPage() {
               <button
                 type="button"
                 onClick={() => setShowTextInput(!showTextInput)}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                className="flex items-center gap-1 text-sm text-[#8578a4] hover:text-[#a898cc]"
               >
                 <svg
                   className={`h-4 w-4 transition-transform ${showTextInput ? "rotate-90" : ""}`}
@@ -410,7 +417,7 @@ export default function ProfileBuilderPage() {
             >
               {loading ? "Analizando..." : "Analizar CV"}
             </button>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-[#8578a4]">
               {fileData
                 ? "PDF listo para enviar"
                 : cvText.length > 0
@@ -443,12 +450,12 @@ export default function ProfileBuilderPage() {
               {parsedCV.projects.map((p, i) => (
                 <div key={i} className="rounded border p-3 text-sm">
                   <div className="font-medium">{p.project_name}</div>
-                  <div className="text-gray-600">{p.short_summary}</div>
+                  <div className="text-[#a898cc]">{p.short_summary}</div>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {p.stack.map((s) => (
                       <span
                         key={s}
-                        className="rounded bg-gray-100 px-2 py-0.5 text-xs"
+                        className="rounded bg-[#1c1430] px-2 py-0.5 text-xs"
                       >
                         {s}
                       </span>
@@ -469,7 +476,7 @@ export default function ProfileBuilderPage() {
               ].map((s) => (
                 <span
                   key={s}
-                  className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+                  className="rounded bg-[#5ce0d8]/10 px-2 py-0.5 text-xs text-[#5ce0d8]"
                 >
                   {s}
                 </span>
@@ -478,7 +485,7 @@ export default function ProfileBuilderPage() {
           </div>
 
           {/* Generation config */}
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border bg-[#1c1430]/70 p-6 shadow-sm">
             <h3 className="mb-3 font-semibold">Configurar generación</h3>
 
             <div className="mb-3">
@@ -492,8 +499,8 @@ export default function ProfileBuilderPage() {
                     onClick={() => toggleAngle(a.value)}
                     className={`rounded-full border px-3 py-1 text-sm ${
                       selectedAngles.includes(a.value)
-                        ? "border-blue-600 bg-blue-600 text-white"
-                        : "border-gray-300 text-gray-600 hover:border-gray-400"
+                        ? "border-[#a0ff7a] bg-[#a0ff7a] text-[#0c0614]"
+                        : "border-[#b4a0d4]/20 text-[#a898cc] hover:border-[#b4a0d4]/30"
                     }`}
                   >
                     {a.label}
@@ -513,8 +520,8 @@ export default function ProfileBuilderPage() {
                     onClick={() => togglePlatform(p.value)}
                     className={`rounded-full border px-3 py-1 text-sm ${
                       selectedPlatforms.includes(p.value)
-                        ? "border-blue-600 bg-blue-600 text-white"
-                        : "border-gray-300 text-gray-600 hover:border-gray-400"
+                        ? "border-[#a0ff7a] bg-[#a0ff7a] text-[#0c0614]"
+                        : "border-[#b4a0d4]/20 text-[#a898cc] hover:border-[#b4a0d4]/30"
                     }`}
                   >
                     {p.label}
@@ -526,7 +533,7 @@ export default function ProfileBuilderPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
-                className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
+                className="rounded-lg border px-4 py-2 text-sm hover:bg-[#0c0614]/60"
               >
                 ← Volver
               </button>
@@ -537,7 +544,7 @@ export default function ProfileBuilderPage() {
                   selectedAngles.length === 0 ||
                   selectedPlatforms.length === 0
                 }
-                className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg bg-[#a0ff7a] px-6 py-2 text-sm font-medium text-[#0c0614] hover:bg-[#a0ff7a]/80 disabled:opacity-50"
               >
                 {loading ? "Generando..." : "Generar perfiles"}
               </button>
@@ -551,7 +558,7 @@ export default function ProfileBuilderPage() {
         <div className="space-y-6">
           {/* Quality notes */}
           {profiles.evidence_quality_notes && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">
+            <div className="rounded-lg border border-[#ff8a50]/30 bg-[#ff8a50]/10 p-3 text-sm">
               <span className="font-semibold">Calidad de evidencia:</span>{" "}
               {profiles.evidence_quality_notes}
             </div>
@@ -559,9 +566,9 @@ export default function ProfileBuilderPage() {
 
           {/* Improvement suggestions */}
           {profiles.improvement_suggestions.length > 0 && (
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <div className="rounded-lg border bg-[#1c1430]/70 p-4 shadow-sm">
               <h3 className="mb-2 font-semibold">Sugerencias de mejora</h3>
-              <ul className="list-inside list-disc space-y-1 text-sm text-gray-600">
+              <ul className="list-inside list-disc space-y-1 text-sm text-[#a898cc]">
                 {profiles.improvement_suggestions.map((s, i) => (
                   <li key={i}>{s}</li>
                 ))}
@@ -570,29 +577,29 @@ export default function ProfileBuilderPage() {
           )}
 
           {/* Import current profile for diff */}
-          <div className="rounded-lg border bg-white p-4 shadow-sm">
+          <div className="rounded-lg border bg-[#1c1430]/70 p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">Comparar con perfil actual</h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[#8578a4]">
                   Importá el archivo{" "}
-                  <code className="rounded bg-gray-100 px-1">
+                  <code className="rounded bg-[#1c1430] px-1">
                     current_profile.json
                   </code>{" "}
                   generado por{" "}
-                  <code className="rounded bg-gray-100 px-1">
+                  <code className="rounded bg-[#1c1430] px-1">
                     upwork-sync profile
                   </code>
                 </p>
               </div>
               {currentProfile ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-green-600">
+                  <span className="text-sm text-[#a0ff7a]">
                     ✓ Perfil importado
                   </span>
                   <button
                     onClick={() => setCurrentProfile(null)}
-                    className="text-xs text-gray-400 hover:text-gray-600"
+                    className="text-xs text-[#8578a4] hover:text-[#a898cc]"
                   >
                     Quitar
                   </button>
@@ -600,7 +607,7 @@ export default function ProfileBuilderPage() {
               ) : (
                 <button
                   onClick={() => profileInputRef.current?.click()}
-                  className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                  className="rounded-lg border border-[#a0ff7a] px-4 py-2 text-sm font-medium text-[#5ce0d8] hover:bg-[#5ce0d8]/10"
                 >
                   Importar perfil
                 </button>
@@ -614,7 +621,7 @@ export default function ProfileBuilderPage() {
               />
             </div>
             {currentProfile && (
-              <div className="mt-3 rounded border bg-gray-50 p-3 text-sm">
+              <div className="mt-3 rounded border bg-[#0c0614]/60 p-3 text-sm">
                 {(currentProfile.title as string) && (
                   <p>
                     <span className="font-medium">Título actual:</span>{" "}
@@ -622,7 +629,7 @@ export default function ProfileBuilderPage() {
                   </p>
                 )}
                 {(currentProfile.overview as string) && (
-                  <p className="mt-1 text-gray-600">
+                  <p className="mt-1 text-[#a898cc]">
                     {(currentProfile.overview as string).slice(0, 120)}...
                   </p>
                 )}
@@ -633,13 +640,13 @@ export default function ProfileBuilderPage() {
                       .map((s) => (
                         <span
                           key={s}
-                          className="rounded bg-gray-200 px-2 py-0.5 text-xs"
+                          className="rounded bg-[#1c1430] px-2 py-0.5 text-xs"
                         >
                           {s}
                         </span>
                       ))}
                     {(currentProfile.skills as string[]).length > 8 && (
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-[#8578a4]">
                         +{(currentProfile.skills as string[]).length - 8} más
                       </span>
                     )}
@@ -653,9 +660,9 @@ export default function ProfileBuilderPage() {
           {profiles.profiles.map((profile) => (
             <div
               key={profile.profile_angle}
-              className="rounded-lg border bg-white shadow-sm"
+              className="rounded-lg border bg-[#1c1430]/70 shadow-sm"
             >
-              <div className="border-b bg-gray-50 px-6 py-3">
+              <div className="border-b bg-[#0c0614]/60 px-6 py-3">
                 <h2 className="text-lg font-bold capitalize">
                   {profile.profile_angle.replace(/_/g, " ")}
                 </h2>
@@ -663,13 +670,13 @@ export default function ProfileBuilderPage() {
               <div className="p-6">
                 {Object.entries(profile.platforms).map(([platform, pData]) => (
                   <div key={platform} className="mb-6 last:mb-0">
-                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
+                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#8578a4]">
                       {platform}
                     </h3>
                     <div className="space-y-3">
                       {pData.title && (
                         <div>
-                          <label className="text-xs font-medium text-gray-400">
+                          <label className="text-xs font-medium text-[#8578a4]">
                             Título
                           </label>
                           {currentProfile &&
@@ -687,7 +694,7 @@ export default function ProfileBuilderPage() {
                       )}
                       {pData.headline && (
                         <div>
-                          <label className="text-xs font-medium text-gray-400">
+                          <label className="text-xs font-medium text-[#8578a4]">
                             Headline
                           </label>
                           <CopyableField text={pData.headline} />
@@ -695,7 +702,7 @@ export default function ProfileBuilderPage() {
                       )}
                       {pData.overview && (
                         <div>
-                          <label className="text-xs font-medium text-gray-400">
+                          <label className="text-xs font-medium text-[#8578a4]">
                             Overview
                           </label>
                           {currentProfile &&
@@ -718,14 +725,14 @@ export default function ProfileBuilderPage() {
                       )}
                       {pData.key_services.length > 0 && (
                         <div>
-                          <label className="text-xs font-medium text-gray-400">
+                          <label className="text-xs font-medium text-[#8578a4]">
                             Servicios clave
                           </label>
                           <div className="mt-1 flex flex-wrap gap-1">
                             {pData.key_services.map((s) => (
                               <span
                                 key={s}
-                                className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+                                className="rounded bg-[#5ce0d8]/10 px-2 py-0.5 text-xs text-[#5ce0d8]"
                               >
                                 {s}
                               </span>
@@ -735,14 +742,14 @@ export default function ProfileBuilderPage() {
                       )}
                       {pData.suggested_tags.length > 0 && (
                         <div>
-                          <label className="text-xs font-medium text-gray-400">
+                          <label className="text-xs font-medium text-[#8578a4]">
                             Tags sugeridos
                           </label>
                           <div className="mt-1 flex flex-wrap gap-1">
                             {pData.suggested_tags.map((t) => (
                               <span
                                 key={t}
-                                className="rounded bg-gray-100 px-2 py-0.5 text-xs"
+                                className="rounded bg-[#1c1430] px-2 py-0.5 text-xs"
                               >
                                 {t}
                               </span>
@@ -762,10 +769,10 @@ export default function ProfileBuilderPage() {
                         )}
                       {pData.selected_proof_points.length > 0 && (
                         <div>
-                          <label className="text-xs font-medium text-gray-400">
+                          <label className="text-xs font-medium text-[#8578a4]">
                             Proof points
                           </label>
-                          <ul className="mt-1 list-inside list-disc text-sm text-gray-600">
+                          <ul className="mt-1 list-inside list-disc text-sm text-[#a898cc]">
                             {pData.selected_proof_points.map((p, i) => (
                               <li key={i}>{p}</li>
                             ))}
@@ -782,7 +789,7 @@ export default function ProfileBuilderPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setStep(2)}
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
+              className="rounded-lg border px-4 py-2 text-sm hover:bg-[#0c0614]/60"
             >
               ← Reconfigurar
             </button>
@@ -794,7 +801,7 @@ export default function ProfileBuilderPage() {
                 setFileName(null);
                 setStep(1);
               }}
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
+              className="rounded-lg border px-4 py-2 text-sm hover:bg-[#0c0614]/60"
             >
               Empezar de nuevo
             </button>
@@ -821,7 +828,7 @@ function CopyableField({
   };
 
   return (
-    <div className="group relative mt-1 rounded border bg-gray-50 p-2 text-sm">
+    <div className="group relative mt-1 rounded border bg-[#0c0614]/60 p-2 text-sm">
       {multiline ? (
         <pre className="whitespace-pre-wrap font-sans">{text}</pre>
       ) : (
@@ -829,7 +836,7 @@ function CopyableField({
       )}
       <button
         onClick={handleCopy}
-        className="absolute right-2 top-2 rounded bg-white px-2 py-1 text-xs text-gray-500 opacity-0 shadow-sm hover:text-gray-700 group-hover:opacity-100"
+        className="absolute right-2 top-2 rounded bg-[#1c1430]/70 px-2 py-1 text-xs text-[#8578a4] opacity-0 shadow-sm hover:text-[#a898cc] group-hover:opacity-100"
       >
         {copied ? "✓ Copiado" : "Copiar"}
       </button>
@@ -850,21 +857,21 @@ function DiffIndicator({
     <div className="mt-1 mb-1">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700"
+        className="flex items-center gap-1 text-xs text-[#ff8a50] hover:text-[#ff8a50]"
       >
-        <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
+        <span className="inline-block h-2 w-2 rounded-full bg-[#ff8a50]" />
         Diferente al perfil actual
-        <span className="text-gray-400">{expanded ? "▲" : "▼"}</span>
+        <span className="text-[#8578a4]">{expanded ? "▲" : "▼"}</span>
       </button>
       {expanded && (
-        <div className="mt-1 rounded border border-amber-200 bg-amber-50 p-2 text-xs">
+        <div className="mt-1 rounded border border-[#ff8a50]/30 bg-[#ff8a50]/10 p-2 text-xs">
           <div className="mb-1">
-            <span className="font-medium text-red-600">Actual:</span>{" "}
-            <span className="text-gray-600">{current}</span>
+            <span className="font-medium text-[#ff5c7a]">Actual:</span>{" "}
+            <span className="text-[#a898cc]">{current}</span>
           </div>
           <div>
-            <span className="font-medium text-green-600">Generado:</span>{" "}
-            <span className="text-gray-600">{generated}</span>
+            <span className="font-medium text-[#a0ff7a]">Generado:</span>{" "}
+            <span className="text-[#a898cc]">{generated}</span>
           </div>
         </div>
       )}
@@ -889,17 +896,17 @@ function SkillsDiff({
   if (added.length === 0 && removed.length === 0) return null;
 
   return (
-    <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs">
-      <label className="mb-1 block font-medium text-amber-700">
+    <div className="rounded border border-[#ff8a50]/30 bg-[#ff8a50]/10 p-3 text-xs">
+      <label className="mb-1 block font-medium text-[#ff8a50]">
         Diferencias en skills/tags
       </label>
       {added.length > 0 && (
         <div className="mb-1 flex flex-wrap gap-1">
-          <span className="text-green-600">+ Agregar:</span>
+          <span className="text-[#a0ff7a]">+ Agregar:</span>
           {added.map((s) => (
             <span
               key={s}
-              className="rounded bg-green-100 px-2 py-0.5 text-green-700"
+              className="rounded bg-[#a0ff7a]/10 px-2 py-0.5 text-[#a0ff7a]"
             >
               {s}
             </span>
@@ -908,17 +915,17 @@ function SkillsDiff({
       )}
       {removed.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          <span className="text-red-600">- No en sugeridos:</span>
+          <span className="text-[#ff5c7a]">- No en sugeridos:</span>
           {removed.slice(0, 10).map((s) => (
             <span
               key={s}
-              className="rounded bg-red-100 px-2 py-0.5 text-red-700"
+              className="rounded bg-[#ff5c7a]/10 px-2 py-0.5 text-[#ff5c7a]"
             >
               {s}
             </span>
           ))}
           {removed.length > 10 && (
-            <span className="text-gray-500">+{removed.length - 10} más</span>
+            <span className="text-[#8578a4]">+{removed.length - 10} más</span>
           )}
         </div>
       )}

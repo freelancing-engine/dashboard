@@ -17,17 +17,20 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  needs_review: "bg-amber-100 text-amber-800",
-  scored: "bg-blue-100 text-blue-800",
-  approved_for_draft: "bg-purple-100 text-purple-800",
-  draft_ready: "bg-indigo-100 text-indigo-800",
-  low_priority: "bg-gray-100 text-gray-600",
-  applied_manually: "bg-cyan-100 text-cyan-800",
-  replied: "bg-teal-100 text-teal-800",
-  interview: "bg-green-100 text-green-800",
-  won: "bg-emerald-100 text-emerald-800",
-  lost: "bg-red-100 text-red-800",
-  archived: "bg-gray-100 text-gray-500",
+  needs_review: "bg-[#ff8a50]/10 text-[#ff8a50] border border-[#ff8a50]/20",
+  scored: "bg-[#5ce0d8]/10 text-[#5ce0d8] border border-[#5ce0d8]/20",
+  approved_for_draft:
+    "bg-[#b4a0d4]/10 text-[#b4a0d4] border border-[#b4a0d4]/20",
+  draft_ready: "bg-[#a0ff7a]/10 text-[#a0ff7a] border border-[#a0ff7a]/20",
+  low_priority: "bg-[#766a94]/10 text-[#8578a4] border border-[#766a94]/20",
+  applied_manually: "bg-[#5ce0d8]/10 text-[#5ce0d8] border border-[#5ce0d8]/20",
+  replied: "bg-[#5ce0d8]/15 text-[#5ce0d8] border border-[#5ce0d8]/25",
+  interview: "bg-[#a0ff7a]/10 text-[#a0ff7a] border border-[#a0ff7a]/20",
+  won: "bg-[#a0ff7a]/15 text-[#a0ff7a] border border-[#a0ff7a]/30",
+  lost: "bg-[#ff5c7a]/10 text-[#ff5c7a] border border-[#ff5c7a]/20",
+  archived: "bg-[#766a94]/10 text-[#8578a4] border border-[#766a94]/20",
+  new: "bg-[#b4a0d4]/10 text-[#b4a0d4] border border-[#b4a0d4]/20",
+  normalized: "bg-[#b4a0d4]/10 text-[#b4a0d4] border border-[#b4a0d4]/20",
 };
 
 const STATUS_ACCENT: Record<string, string> = {
@@ -55,14 +58,22 @@ export function StatsBar({
 
   return (
     <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-      <div className="card kpi-card kpi-card--primary animate-fade-in stagger-1 p-3">
-        <div className="text-xs font-medium text-[var(--color-text-muted)]">Total leads</div>
-        <div className="text-2xl font-bold text-[var(--color-text-primary)]">{totalLeads}</div>
+      <div className="card kpi-card kpi-card--primary animate-fade-in stagger-1 p-4">
+        <div className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+          Total leads
+        </div>
+        <div className="kpi-number mt-1 text-3xl font-bold text-[var(--color-text-primary)]">
+          {totalLeads}
+        </div>
       </div>
-      <div className="card kpi-card kpi-card--accent animate-fade-in stagger-2 p-3">
-        <div className="text-xs font-medium text-[var(--color-text-muted)]">Puntaje promedio</div>
-        <div className="text-2xl font-bold text-[var(--color-text-primary)]">{scoreStats.avg ?? "—"}</div>
-        <div className="text-xs text-[var(--color-text-muted)]">
+      <div className="card kpi-card kpi-card--accent animate-fade-in stagger-2 p-4">
+        <div className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+          Puntaje promedio
+        </div>
+        <div className="kpi-number mt-1 text-3xl font-bold text-[var(--color-text-primary)]">
+          {scoreStats.avg ?? "—"}
+        </div>
+        <div className="kpi-number mt-0.5 text-xs text-[var(--color-text-muted)]">
           {scoreStats.min}–{scoreStats.max}
         </div>
       </div>
@@ -72,14 +83,16 @@ export function StatsBar({
         .map((s, i) => (
           <div
             key={s.lead_status}
-            className={`card kpi-card ${STATUS_ACCENT[s.lead_status] || ""} animate-fade-in stagger-${i + 3} p-3`}
+            className={`card kpi-card ${STATUS_ACCENT[s.lead_status] || ""} animate-fade-in stagger-${i + 3} p-4`}
           >
-            <div className="text-xs font-medium text-[var(--color-text-muted)]">
+            <div className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
               {STATUS_LABELS[s.lead_status] || s.lead_status}
             </div>
-            <div className="text-2xl font-bold text-[var(--color-text-primary)]">{s.count}</div>
+            <div className="kpi-number mt-1 text-3xl font-bold text-[var(--color-text-primary)]">
+              {s.count}
+            </div>
             <span
-              className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[s.lead_status] || "bg-gray-100"}`}
+              className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[s.lead_status] || "bg-gray-100"}`}
             >
               {s.lead_status}
             </span>

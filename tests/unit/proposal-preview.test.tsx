@@ -147,7 +147,7 @@ describe("ProposalPreview", () => {
       <ProposalPreview lead={makeLead()} drafts={[makeDraft()]} />,
     );
 
-    expect(container.querySelector(".text-green-600")).not.toBeNull();
+    expect(container.querySelector(".text-\\[\\#a0ff7a\\]")).not.toBeNull();
     expect(screen.getByText("★")).toBeInTheDocument();
   });
 

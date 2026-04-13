@@ -8,35 +8,35 @@ const OUTCOMES = [
     value: "replied",
     label: "Respondió",
     emoji: "💬",
-    color: "bg-teal-100 hover:bg-teal-200 text-teal-800",
+    color: "bg-[#5ce0d8]/15 hover:bg-[#5ce0d8]/25 text-[#5ce0d8]",
     hint: "El cliente respondió a tu propuesta",
   },
   {
     value: "interview",
     label: "Entrevista",
     emoji: "🎙️",
-    color: "bg-purple-100 hover:bg-purple-200 text-purple-800",
+    color: "bg-[#b4a0d4]/15 hover:bg-[#b4a0d4]/25 text-[#b4a0d4]",
     hint: "Entrevista agendada o realizada",
   },
   {
     value: "won",
     label: "Ganado",
     emoji: "🏆",
-    color: "bg-green-600 hover:bg-green-700 text-white",
+    color: "bg-[#a0ff7a]/20 hover:bg-[#a0ff7a]/30 text-[#a0ff7a]",
     hint: "Contrato ganado",
   },
   {
     value: "lost",
     label: "Perdido",
     emoji: "❌",
-    color: "bg-red-100 hover:bg-red-200 text-red-800",
+    color: "bg-[#ff5c7a]/15 hover:bg-[#ff5c7a]/25 text-[#ff5c7a]",
     hint: "Lead perdido (sin respuesta, rechazado, etc.)",
   },
   {
     value: "archived",
     label: "Archivar",
     emoji: "📦",
-    color: "bg-gray-200 hover:bg-gray-300 text-gray-700",
+    color: "bg-[#766a94]/15 hover:bg-[#766a94]/25 text-[#8578a4]",
     hint: "Dejar de hacer seguimiento",
   },
 ] as const;
@@ -84,23 +84,23 @@ export function OutcomeActions({
   });
 
   return (
-    <div className="rounded-lg border bg-white p-4 shadow-sm">
+    <div className="rounded-lg card p-4">
       <h2 className="mb-3 font-semibold">Registrar outcome</h2>
-      <p className="mb-3 text-sm text-gray-500">
+      <p className="mb-3 text-sm text-[#8578a4]">
         Registrá el resultado de esta propuesta para hacer seguimiento.
       </p>
-      {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mb-3 text-sm text-[#ff5c7a]">{error}</p>}
       <form action={formAction}>
         <input type="hidden" name="leadId" value={leadId} />
         <div className="mb-3">
-          <label htmlFor="notes" className="mb-1 block text-sm text-gray-600">
+          <label htmlFor="notes" className="mb-1 block text-sm text-[#a898cc]">
             Notas (opcional)
           </label>
           <input
             id="notes"
             name="notes"
             type="text"
-            className="w-full rounded border px-3 py-1.5 text-sm"
+            className="w-full rounded border border-[rgba(180,160,212,0.12)] bg-[#1c1430] px-3 py-1.5 text-sm text-[#f0eeff]"
             placeholder="Detalles del resultado..."
           />
         </div>

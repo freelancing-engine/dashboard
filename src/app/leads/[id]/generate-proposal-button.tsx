@@ -27,9 +27,9 @@ export function GenerateProposalButton({
   if (!canGenerate) return null;
 
   return (
-    <div className="rounded-lg border border-dashed border-blue-300 bg-blue-50 p-4">
-      <h2 className="mb-2 font-semibold text-blue-800">Generar propuesta</h2>
-      <p className="mb-3 text-sm text-blue-600">
+    <div className="rounded-lg border border-dashed border-[#5ce0d8]/20 bg-[#5ce0d8]/10 p-4">
+      <h2 className="mb-2 font-semibold text-[#5ce0d8]">Generar propuesta</h2>
+      <p className="mb-3 text-sm text-[#5ce0d8]/80">
         El agente generará 3 versiones de propuesta (corta, estándar,
         consultiva) basándose en el análisis del lead.
       </p>
@@ -38,19 +38,19 @@ export function GenerateProposalButton({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50"
         >
           {isPending ? "Generando propuesta..." : "Generar propuesta con IA"}
         </button>
       </form>
       {state && "error" in state && state.error && (
-        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
-          <p className="text-sm text-red-700">{state.error}</p>
+        <div className="mt-3 rounded-md border border-[#ff5c7a]/20 bg-[#ff5c7a]/10 p-3">
+          <p className="text-sm text-[#ff5c7a]">{state.error}</p>
         </div>
       )}
       {state && "success" in state && state.success && (
-        <div className="mt-3 rounded-md border border-green-200 bg-green-50 p-3">
-          <p className="text-sm text-green-700">
+        <div className="mt-3 rounded-md border border-[#a0ff7a]/20 bg-[#a0ff7a]/10 p-3">
+          <p className="text-sm text-[#a0ff7a]">
             Propuesta generada. Recargá la página para verla.
           </p>
         </div>

@@ -27,3 +27,11 @@ next-env.d.ts
 /blob-report/
 /playwright/.cache/
 bash.exe.stackdump
+
+# terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/terraform.tfvars
+terraform/.terraform.tfstate.lock.info
