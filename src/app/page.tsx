@@ -3,7 +3,6 @@ import { LeadTable } from "./components/lead-table";
 import { StatsBar } from "./components/stats-bar";
 import { Filters } from "./components/filters";
 import Link from "next/link";
-import Image from "next/image";
 
 interface PageProps {
   searchParams: Promise<{
@@ -42,14 +41,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     <main className="page-enter mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="Freelancing Engine"
-            width={40}
-            height={40}
-            priority
-            className="drop-shadow-[0_0_8px_rgba(92,224,216,0.3)]"
-          />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#A0FF7A] to-[#5CE0D8] text-lg font-bold text-[#0C0614] shadow-[0_0_12px_rgba(160,255,122,0.3)]">
+            FE
+          </div>
           <h1 className="font-display text-3xl font-bold text-gradient">
             Freelancing Engine
           </h1>

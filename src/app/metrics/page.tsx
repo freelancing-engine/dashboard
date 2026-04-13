@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { getMetrics } from "@/lib/leads";
 import {
@@ -19,17 +18,6 @@ export default async function MetricsPage() {
 
   return (
     <main className="page-enter mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      {/* Decorative hero accent */}
-      <div className="pointer-events-none absolute right-0 top-0 -z-10 h-72 w-96 overflow-hidden opacity-10 blur-sm">
-        <Image
-          src="/abstract-art.png"
-          alt=""
-          fill
-          className="object-cover"
-          aria-hidden="true"
-        />
-      </div>
-
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-display text-3xl font-bold text-gradient">
           Métricas

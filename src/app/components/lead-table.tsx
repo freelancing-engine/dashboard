@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { LeadListItem } from "@/lib/types";
 import { STATUS_LABELS, STATUS_COLORS } from "./stats-bar";
@@ -35,15 +34,7 @@ export function LeadTable({ leads }: { leads: LeadListItem[] }) {
   if (leads.length === 0) {
     return (
       <div className="card animate-fade-in p-8 text-center">
-        <div className="relative mx-auto mb-4 h-36 w-36 overflow-hidden rounded-xl opacity-70">
-          <Image
-            src="/empty-state.png"
-            alt="No results"
-            fill
-            className="object-cover"
-            style={{ objectPosition: "50% 50%" }}
-          />
-        </div>
+        <div className="mx-auto mb-4 text-5xl opacity-60">🔍</div>
         <p className="text-[var(--color-text-muted)]">
           No se encontraron leads.
         </p>

@@ -1,6 +1,15 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+
+
+
+
+
+
+
+
+
+</svg>  <text x="5" y="24" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="url(#g)">FE</text>  <rect width="32" height="32" rx="6" fill="#0C0614"/>  </defs>    </linearGradient>      <stop offset="100%" stop-color="#5CE0D8"/>      <stop offset="0%" stop-color="#A0FF7A"/>    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">import { useEffect, useState, useCallback } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { SPRING_CURSOR, SPRING_INTERACTIVE } from "@/lib/animation";
 import { useA11y } from "./accessibility-provider";
@@ -87,9 +96,6 @@ export default function CustomCursor() {
     document.addEventListener("selectstart", handleSelectStart);
     document.addEventListener("selectionchange", handleSelectEnd);
 
-    // Hide default cursor globally
-    document.documentElement.style.cursor = "none";
-
     return () => {
       document.removeEventListener("mousemove", handleMove);
       document.removeEventListener("mousedown", handleDown);
@@ -99,7 +105,6 @@ export default function CustomCursor() {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("selectstart", handleSelectStart);
       document.removeEventListener("selectionchange", handleSelectEnd);
-      document.documentElement.style.cursor = "";
     };
   }, [
     mouseX,
