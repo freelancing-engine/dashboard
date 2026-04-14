@@ -500,23 +500,6 @@ select option {
   color: #f0eeff;
 }
 
-/* --- Custom cursor: hide native cursor on non-touch devices --- */
-@media (pointer: fine) {
-  *,
-  *::before,
-  *::after {
-    cursor: none !important;
-  }
-
-  /* Restore native cursor during keyboard navigation */
-  :focus-visible,
-  :focus-visible *,
-  :focus-visible *::before,
-  :focus-visible *::after {
-    cursor: auto !important;
-  }
-}
-
 /* --- Reduced motion: OS preference --- */
 @media (prefers-reduced-motion: reduce) {
   *,
